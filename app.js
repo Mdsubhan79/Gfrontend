@@ -24,37 +24,48 @@ const DOM = {
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', async () => {
-
     AppState.socketManager = new SocketManager();
-
     setupEventListeners();
-
     checkTeamInvite();
 
     // LOAD SAVED USER
     const savedUser = localStorage.getItem('goalTrackerUser');
-
-    // LOAD SAVED GOAL
-    const savedGoal = localStorage.getItem('currentGoal');
-
+    
     if (savedUser) {
-
         AppState.currentUser = JSON.parse(savedUser);
-
-        AppState.socketManager.connect(
-            AppState.currentUser._id
-        );
-
+        AppState.socketManager.connect(AppState.currentUser._id);
+        
+        // LOAD SAVED GOAL
+        const savedGoal = localStorage.getItem('currentGoal');
+        if (savedGoal) {
+            AppState.currentGoal = JSON.parse(savedGoal);
+            
+            // Check if goal still exists and is valid
+            try {
+                const response = await API.getGoal(AppState.currentGoal._id);
+                if (response.success) {
+                    AppState.currentGoal = response.goal;
+                    localStorage.setItem('currentGoal', JSON.stringify(response.goal));
+                    
+                    if (response.goal.status === 'completed') {
+                        showCongratulations();
+                    } else {
+                        await loadProgressSection();
+                    }
+                } else {
+                    // Goal doesn't exist anymore
+                    localStorage.removeItem('currentGoal');
+                    AppState.currentGoal = null;
+                    showModeSelection();
+                }
+            } catch (error) {
+                console.error('Error loading saved goal:', error);
+                localStorage.removeItem('currentGoal');
+                AppState.currentGoal = null;
+                showModeSelection();
+            }
+        }
     }
-
-    if (savedGoal) {
-
-        AppState.currentGoal = JSON.parse(savedGoal);
-
-        await loadProgressSection();
-
-    }
-
 });
 
 // Setup Event Listeners
@@ -139,10 +150,7 @@ async function handleRegistration(e) {
         
         if (response.success) {
             AppState.currentUser = response.user;
-            localStorage.setItem(
-    'goalTrackerUser',
-    JSON.stringify(response.user)
-);
+            localStorage.setItem('goalTrackerUser', JSON.stringify(response.user));
             
             // Initialize socket connection
             AppState.socketManager.connect(response.user._id);
@@ -173,10 +181,7 @@ async function handleJoinTeam(teamLink, userId) {
 
         if (response.success) {
             AppState.currentGoal = response.goal;
-            localStorage.setItem(
-    'currentGoal',
-    JSON.stringify(response.goal)
-);
+            localStorage.setItem('currentGoal', JSON.stringify(response.goal));
             
             showToast('Successfully joined the team!', 'success');
             showTeamLinkSection();
@@ -193,6 +198,14 @@ async function handleJoinTeam(teamLink, userId) {
 // Show Mode Selection
 function showModeSelection() {
     hideAllSections();
+    
+    // Show landing if no user
+    if (!AppState.currentUser) {
+        DOM.landingSection.classList.remove('hidden');
+        DOM.landingSection.classList.add('slide-in-up');
+        return;
+    }
+    
     DOM.modeSection.classList.remove('hidden');
     DOM.modeSection.classList.add('slide-in-up');
 }
@@ -237,12 +250,10 @@ async function handleGoalSetup(e) {
         
         if (response.success) {
             AppState.currentGoal = response.goal;
-            localStorage.setItem(
-    'currentGoal',
-    JSON.stringify(response.goal)
-);
+            localStorage.setItem('currentGoal', JSON.stringify(response.goal));
+            
             if (AppState.selectedMode === 'solo') {
-                loadProgressSection();
+                await loadProgressSection();
             } else {
                 showTeamLinkSection();
             }
@@ -274,11 +285,18 @@ function showTeamLinkSection() {
 }
 
 // Copy Team Link
-function copyTeamLink() {
+async function copyTeamLink() {
     const linkInput = document.getElementById('team-link-input');
     linkInput.select();
-    document.execCommand('copy');
-    showToast('Link copied to clipboard!', 'success');
+    
+    try {
+        await navigator.clipboard.writeText(linkInput.value);
+        showToast('Link copied to clipboard!', 'success');
+    } catch (err) {
+        // Fallback for older browsers
+        document.execCommand('copy');
+        showToast('Link copied to clipboard!', 'success');
+    }
 }
 
 // Update Team Members List
@@ -287,38 +305,42 @@ async function updateTeamMembersList() {
         const response = await API.getGoal(AppState.currentGoal._id);
         const goal = response.goal;
         
+        if (!goal) return;
+        
         const membersList = document.getElementById('team-members-list');
         const waitingMessage = document.getElementById('waiting-message');
         const startButton = document.getElementById('start-team-btn');
         
         membersList.innerHTML = '';
         
-        goal.teamMembers.forEach((member, index) => {
-            const memberCard = document.createElement('div');
-            memberCard.className = 'bg-gradient-to-r from-gray-50 to-indigo-50 rounded-xl p-4 flex items-center justify-between';
-            memberCard.innerHTML = `
-                <div class="flex items-center">
-                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mr-4">
-                        <span class="text-white font-bold text-lg">${member.name.charAt(0)}</span>
+        if (goal.teamMembers && goal.teamMembers.length > 0) {
+            goal.teamMembers.forEach((member, index) => {
+                const memberCard = document.createElement('div');
+                memberCard.className = 'bg-gradient-to-r from-gray-50 to-indigo-50 rounded-xl p-4 flex items-center justify-between';
+                memberCard.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-white font-bold text-lg">${member.name ? member.name.charAt(0) : '?'}</span>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800">${member.name || 'Unknown'}</p>
+                            <p class="text-sm text-gray-500">${member.email || ''}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="font-semibold text-gray-800">${member.name}</p>
-                        <p class="text-sm text-gray-500">${member.email}</p>
-                    </div>
-                </div>
-                <span class="px-4 py-2 rounded-full text-sm font-semibold ${
-                    index === 0 
-                        ? 'bg-yellow-100 text-yellow-700' 
-                        : 'bg-green-100 text-green-700'
-                }">
-                    ${index === 0 ? '👑 Creator' : '✨ Member'}
-                </span>
-            `;
-            membersList.appendChild(memberCard);
-        });
+                    <span class="px-4 py-2 rounded-full text-sm font-semibold ${
+                        index === 0 
+                            ? 'bg-yellow-100 text-yellow-700' 
+                            : 'bg-green-100 text-green-700'
+                    }">
+                        ${index === 0 ? '👑 Creator' : '✨ Member'}
+                    </span>
+                `;
+                membersList.appendChild(memberCard);
+            });
+        }
         
         // Show/hide waiting message and start button
-        if (goal.teamMembers.length >= goal.maxTeamMembers) {
+        if (goal.teamMembers && goal.teamMembers.length >= goal.maxTeamMembers) {
             waitingMessage.classList.add('hidden');
             startButton.classList.remove('hidden');
         } else {
@@ -327,11 +349,9 @@ async function updateTeamMembersList() {
         }
         
         AppState.currentGoal = goal;
-        localStorage.setItem(
-    'currentGoal',
-    JSON.stringify(goal)
-);
+        localStorage.setItem('currentGoal', JSON.stringify(goal));
     } catch (error) {
+        console.error('Failed to update team list:', error);
         showToast('Failed to update team list', 'error');
     }
 }
@@ -348,11 +368,8 @@ async function startTeamGoal() {
         
         if (response.success) {
             AppState.currentGoal = response.goal;
-            localStorage.setItem(
-    'currentGoal',
-    JSON.stringify(response.goal)
-);
-            loadProgressSection();
+            localStorage.setItem('currentGoal', JSON.stringify(response.goal));
+            await loadProgressSection();
         } else {
             showToast(response.message || 'Failed to start goal', 'error');
         }
@@ -369,20 +386,31 @@ async function loadProgressSection() {
     showLoading(true);
     
     try {
+        // Get fresh goal data from API
         const response = await API.getGoal(AppState.currentGoal._id);
+        
+        if (!response.success) {
+            showToast('Failed to load goal', 'error');
+            return;
+        }
+        
         const goal = response.goal;
         AppState.currentGoal = goal;
+        localStorage.setItem('currentGoal', JSON.stringify(goal));
         
         // Update UI
         document.getElementById('current-goal-name').textContent = goal.goalName;
         document.getElementById('goal-mode-display').textContent = 
             goal.mode === 'solo' ? '🎯 Solo Goal' : '👥 Team Goal';
         
-        // Progress info
+        // Get completed days count
         const completedDays = getCompletedDaysCount();
         const totalDays = goal.totalDays;
+        
+        // Progress info
+        const currentDayDisplay = Math.min(completedDays + 1, totalDays);
         document.getElementById('days-progress').textContent = 
-            `Day ${Math.min(completedDays + 1, totalDays)} / ${totalDays}`;
+            `Day ${currentDayDisplay} / ${totalDays}`;
         
         const daysLeft = totalDays - completedDays;
         document.getElementById('days-left-display').textContent = 
@@ -399,9 +427,8 @@ async function loadProgressSection() {
         }
         
         // Set current day title
-        const currentDay = completedDays + 1;
         document.getElementById('current-day-title').textContent = 
-            `Day ${currentDay}: What's Your Plan?`;
+            `Day ${currentDayDisplay}: What's Your Plan?`;
         
         // Check if next day is unlocked
         const canProceed = checkDayUnlocked();
@@ -409,6 +436,8 @@ async function loadProgressSection() {
         if (canProceed) {
             document.getElementById('current-day-section').classList.remove('hidden');
             document.getElementById('next-day-timer').classList.add('hidden');
+            // Clear any existing timer
+            clearInterval(AppState.dayTimer);
         } else {
             document.getElementById('current-day-section').classList.add('hidden');
             document.getElementById('next-day-timer').classList.remove('hidden');
@@ -430,6 +459,7 @@ async function loadProgressSection() {
         DOM.progressSection.classList.add('slide-in-up');
         
     } catch (error) {
+        console.error('Failed to load progress:', error);
         showToast('Failed to load progress', 'error');
     } finally {
         showLoading(false);
@@ -440,64 +470,105 @@ async function loadProgressSection() {
 function getCompletedDaysCount() {
     if (!AppState.currentGoal) return 0;
     
-    if (AppState.currentGoal.mode === 'team') {
-        const userProgress = AppState.currentGoal.teamProgress.find(
-            tp => tp.userId === AppState.currentUser._id || 
-                  tp.userId._id === AppState.currentUser._id
-        );
-        return userProgress ? userProgress.userProgress.length : 0;
-    } else {
-        function getCompletedDaysCount() {
-
-    if (!AppState.currentGoal) return 0;
-
-    const userProgress = getCurrentUserProgress();
-
-    return userProgress.length;
-}
+    const goal = AppState.currentGoal;
+    
+    // For both solo and team modes, check teamProgress
+    if (goal.teamProgress && goal.teamProgress.length > 0) {
+        // Find current user's progress
+        const userProgress = goal.teamProgress.find(tp => {
+            const tpUserId = typeof tp.userId === 'object' ? tp.userId._id || tp.userId.toString() : tp.userId;
+            const currentUserId = AppState.currentUser._id;
+            return tpUserId === currentUserId || tpUserId.toString() === currentUserId.toString();
+        });
+        
+        if (userProgress && userProgress.userProgress) {
+            return userProgress.userProgress.length;
+        }
     }
+    
+    // For solo mode, also check if there's a currentDay property
+    if (goal.mode === 'solo' && goal.currentDay) {
+        return goal.currentDay - 1;
+    }
+    
+    return 0;
 }
 
 // Check if current day is unlocked
 function checkDayUnlocked() {
     if (!AppState.currentGoal) return true;
     
-    if (AppState.currentGoal.mode === 'team') {
-        const userProgress = AppState.currentGoal.teamProgress.find(
-            tp => tp.userId === AppState.currentUser._id || 
-                  tp.userId._id === AppState.currentUser._id
-        );
-        
-        if (!userProgress || userProgress.userProgress.length === 0) return true;
-        
-        const lastCompletedDay = userProgress.userProgress[userProgress.userProgress.length - 1];
-        if (!lastCompletedDay) return true;
-        
-        const lastCompletedTime = new Date(lastCompletedDay.completedAt).getTime();
-        const currentTime = new Date().getTime();
-        const hoursDiff = (currentTime - lastCompletedTime) / (1000 * 60 * 60);
-        
-        return hoursDiff >= 24;
-    } else {
-        // For solo mode, we track based on goal's last day completion
-        return true; // Simplified for solo mode
+    const goal = AppState.currentGoal;
+    
+    // Find current user's progress
+    let userProgressData = null;
+    
+    if (goal.teamProgress && goal.teamProgress.length > 0) {
+        userProgressData = goal.teamProgress.find(tp => {
+            const tpUserId = typeof tp.userId === 'object' ? tp.userId._id || tp.userId.toString() : tp.userId;
+            const currentUserId = AppState.currentUser._id;
+            return tpUserId === currentUserId || tpUserId.toString() === currentUserId.toString();
+        });
     }
+    
+    // If no progress yet, it's unlocked
+    if (!userProgressData || !userProgressData.userProgress || userProgressData.userProgress.length === 0) {
+        return true;
+    }
+    
+    // Get last completed day
+    const lastCompletedDay = userProgressData.userProgress[userProgressData.userProgress.length - 1];
+    if (!lastCompletedDay || !lastCompletedDay.completedAt) return true;
+    
+    // Check 24-hour rule
+    const lastCompletedTime = new Date(lastCompletedDay.completedAt).getTime();
+    const currentTime = new Date().getTime();
+    const hoursDiff = (currentTime - lastCompletedTime) / (1000 * 60 * 60);
+    
+    return hoursDiff >= 24;
 }
 
 // Start day timer
 function startDayTimer() {
     clearInterval(AppState.dayTimer);
-    
     updateDayTimer();
     AppState.dayTimer = setInterval(updateDayTimer, 1000);
 }
 
 // Update day timer display
 function updateDayTimer() {
-    const userProgress = getCurrentUserProgress();
-    if (!userProgress || userProgress.length === 0) return;
+    const goal = AppState.currentGoal;
+    if (!goal) {
+        clearInterval(AppState.dayTimer);
+        return;
+    }
     
-    const lastCompletedDay = userProgress[userProgress.length - 1];
+    // Find current user's progress
+    let userProgressData = null;
+    
+    if (goal.teamProgress && goal.teamProgress.length > 0) {
+        userProgressData = goal.teamProgress.find(tp => {
+            const tpUserId = typeof tp.userId === 'object' ? tp.userId._id || tp.userId.toString() : tp.userId;
+            const currentUserId = AppState.currentUser._id;
+            return tpUserId === currentUserId || tpUserId.toString() === currentUserId.toString();
+        });
+    }
+    
+    if (!userProgressData || !userProgressData.userProgress || userProgressData.userProgress.length === 0) {
+        clearInterval(AppState.dayTimer);
+        document.getElementById('current-day-section').classList.remove('hidden');
+        document.getElementById('next-day-timer').classList.add('hidden');
+        return;
+    }
+    
+    const lastCompletedDay = userProgressData.userProgress[userProgressData.userProgress.length - 1];
+    if (!lastCompletedDay || !lastCompletedDay.completedAt) {
+        clearInterval(AppState.dayTimer);
+        document.getElementById('current-day-section').classList.remove('hidden');
+        document.getElementById('next-day-timer').classList.add('hidden');
+        return;
+    }
+    
     const lastCompletedTime = new Date(lastCompletedDay.completedAt).getTime();
     const unlockTime = lastCompletedTime + (24 * 60 * 60 * 1000);
     const currentTime = new Date().getTime();
@@ -520,18 +591,21 @@ function updateDayTimer() {
 
 // Get current user's progress
 function getCurrentUserProgress() {
-
     if (!AppState.currentGoal) return [];
-
-    const userProgress = AppState.currentGoal.teamProgress.find(
-        tp =>
-            tp.userId === AppState.currentUser._id ||
-            tp.userId._id === AppState.currentUser._id
-    );
-
-    return userProgress
-        ? userProgress.userProgress
-        : [];
+    
+    const goal = AppState.currentGoal;
+    
+    if (goal.teamProgress && goal.teamProgress.length > 0) {
+        const userProgressData = goal.teamProgress.find(tp => {
+            const tpUserId = typeof tp.userId === 'object' ? tp.userId._id || tp.userId.toString() : tp.userId;
+            const currentUserId = AppState.currentUser._id;
+            return tpUserId === currentUserId || tpUserId.toString() === currentUserId.toString();
+        });
+        
+        return userProgressData ? userProgressData.userProgress || [] : [];
+    }
+    
+    return [];
 }
 
 // Handle Day Complete
@@ -541,11 +615,17 @@ async function handleDayComplete(e) {
     
     const task = document.getElementById('day-task-input').value;
     
+    if (!task || task.trim() === '') {
+        showToast('Please enter a task description', 'warning');
+        showLoading(false);
+        return;
+    }
+    
     try {
         const response = await API.completeDay({
             goalId: AppState.currentGoal._id,
             userId: AppState.currentUser._id,
-            task
+            task: task.trim()
         });
         
         if (response.success) {
@@ -556,16 +636,14 @@ async function handleDayComplete(e) {
             } else {
                 showToast('🎉 Day completed! Great job!', 'success');
                 AppState.currentGoal = response.goal;
-                localStorage.setItem(
-    'currentGoal',
-    JSON.stringify(response.goal)
-);
-                loadProgressSection();
+                localStorage.setItem('currentGoal', JSON.stringify(response.goal));
+                await loadProgressSection();
             }
         } else {
             showToast(response.message || 'Failed to complete day', 'error');
         }
     } catch (error) {
+        console.error('Error completing day:', error);
         showToast('Failed to save progress', 'error');
     } finally {
         showLoading(false);
@@ -575,17 +653,26 @@ async function handleDayComplete(e) {
 // Update Team Progress
 function updateTeamProgress(goal) {
     const teamGrid = document.getElementById('team-progress-grid');
+    if (!teamGrid) return;
+    
     teamGrid.innerHTML = '';
     
+    if (!goal.teamMembers || goal.teamMembers.length === 0) return;
+    
     goal.teamMembers.forEach((member, index) => {
-        const memberId = typeof member === 'object' ? member._id : member;
-        const memberProgress = goal.teamProgress.find(
-            tp => tp.userId === memberId || 
-                  (typeof tp.userId === 'object' && tp.userId._id === memberId)
-        );
+        const memberId = typeof member === 'object' ? (member._id || member.id) : member;
+        const memberName = typeof member === 'object' ? (member.name || 'Unknown') : 'Unknown';
+        const memberEmail = typeof member === 'object' ? (member.email || '') : '';
         
-        const completedDays = memberProgress ? memberProgress.userProgress.length : 0;
-        const progressPercent = (completedDays / goal.totalDays) * 100;
+        // Find member progress
+        const memberProgressData = goal.teamProgress ? goal.teamProgress.find(tp => {
+            const tpUserId = typeof tp.userId === 'object' ? (tp.userId._id || tp.userId.toString()) : tp.userId;
+            return tpUserId === memberId || tpUserId.toString() === memberId.toString();
+        }) : null;
+        
+        const memberProgress = memberProgressData ? memberProgressData.userProgress || [] : [];
+        const completedDays = memberProgress.length;
+        const progressPercent = goal.totalDays > 0 ? (completedDays / goal.totalDays) * 100 : 0;
         
         const memberCard = document.createElement('div');
         memberCard.className = 'bg-gradient-to-br from-gray-50 to-indigo-50 rounded-xl p-6';
@@ -593,11 +680,11 @@ function updateTeamProgress(goal) {
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center">
                     <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mr-3">
-                        <span class="text-white font-bold">${member.name ? member.name.charAt(0) : '?'}</span>
+                        <span class="text-white font-bold">${memberName.charAt(0)}</span>
                     </div>
                     <div>
-                        <p class="font-semibold text-gray-800">${member.name || 'Unknown'}</p>
-                        <p class="text-sm text-gray-500">${member.email || ''}</p>
+                        <p class="font-semibold text-gray-800">${memberName}</p>
+                        <p class="text-sm text-gray-500">${memberEmail}</p>
                     </div>
                 </div>
                 <span class="text-lg font-bold text-indigo-600">${completedDays}/${goal.totalDays}</span>
@@ -607,7 +694,7 @@ function updateTeamProgress(goal) {
                      style="width: ${progressPercent}%"></div>
             </div>
             <div class="space-y-1">
-                ${memberProgress && memberProgress.userProgress.slice(-3).map(day => `
+                ${memberProgress.slice(-3).map(day => `
                     <p class="text-sm text-gray-600">
                         <span class="font-medium">Day ${day.dayNumber}:</span> ${day.task}
                     </p>
@@ -622,11 +709,13 @@ function updateTeamProgress(goal) {
 // Load Progress History
 function loadProgressHistory() {
     const historyContainer = document.getElementById('progress-history');
+    if (!historyContainer) return;
+    
     historyContainer.innerHTML = '';
     
     const userProgress = getCurrentUserProgress();
     
-    if (userProgress.length === 0) {
+    if (!userProgress || userProgress.length === 0) {
         historyContainer.innerHTML = `
             <div class="text-center py-8 text-gray-500">
                 <i class="fas fa-tasks text-4xl mb-3"></i>
@@ -636,9 +725,19 @@ function loadProgressHistory() {
         return;
     }
     
+    // Show all completed days in reverse order (newest first)
     [...userProgress].reverse().forEach(day => {
         const dayCard = document.createElement('div');
         dayCard.className = 'goal-card bg-white border-2 border-gray-100 rounded-xl p-4 flex items-center';
+        
+        const completedDate = day.completedAt ? new Date(day.completedAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }) : 'Unknown date';
+        
         dayCard.innerHTML = `
             <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mr-4">
                 <i class="fas fa-check text-white text-xl"></i>
@@ -646,9 +745,9 @@ function loadProgressHistory() {
             <div class="flex-grow">
                 <div class="flex justify-between items-center">
                     <p class="font-semibold text-gray-800">Day ${day.dayNumber}</p>
-                    <span class="text-sm text-gray-500">${new Date(day.completedAt).toLocaleDateString()}</span>
+                    <span class="text-sm text-gray-500">${completedDate}</span>
                 </div>
-                <p class="text-gray-600 mt-1">${day.task}</p>
+                <p class="text-gray-600 mt-1">${day.task || 'No description'}</p>
             </div>
         `;
         historyContainer.appendChild(dayCard);
@@ -658,11 +757,18 @@ function loadProgressHistory() {
 // Show Congratulations
 function showCongratulations() {
     hideAllSections();
-    DOM.congratsModal.classList.remove('hidden');
-    DOM.congratsModal.classList.add('flex', 'fade-in');
     
-    document.getElementById('completed-goal-name').textContent = 
-        `Goal: ${AppState.currentGoal.goalName}`;
+    const modal = DOM.congratsModal;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex', 'fade-in');
+    
+    if (AppState.currentGoal) {
+        document.getElementById('completed-goal-name').textContent = 
+            `Goal: ${AppState.currentGoal.goalName}`;
+    }
+    
+    // Clear localStorage goal
+    localStorage.removeItem('currentGoal');
     
     // Create confetti effect
     createConfetti();
@@ -671,26 +777,30 @@ function showCongratulations() {
 // Create confetti effect
 function createConfetti() {
     const canvas = document.getElementById('confetti-canvas');
+    if (!canvas) return;
+    
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     
     const confettiPieces = [];
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FF69B4', '#FFD700'];
     
     // Create confetti pieces
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 150; i++) {
         confettiPieces.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height - canvas.height,
-            size: Math.random() * 10 + 5,
+            size: Math.random() * 8 + 4,
             color: colors[Math.floor(Math.random() * colors.length)],
-            speedX: Math.random() * 6 - 3,
+            speedX: Math.random() * 4 - 2,
             speedY: Math.random() * 3 + 2,
             rotation: Math.random() * 360,
-            rotationSpeed: Math.random() * 10 - 5
+            rotationSpeed: Math.random() * 8 - 4
         });
     }
+    
+    let animationId;
     
     // Animation loop
     function animate() {
@@ -699,42 +809,55 @@ function createConfetti() {
         confettiPieces.forEach(piece => {
             ctx.save();
             ctx.translate(piece.x, piece.y);
-            ctx.rotate(piece.rotation * Math.PI / 180);
+            ctx.rotate((piece.rotation * Math.PI) / 180);
             ctx.fillStyle = piece.color;
-            ctx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size);
+            ctx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size / 2);
             ctx.restore();
             
             piece.x += piece.speedX;
             piece.y += piece.speedY;
             piece.rotation += piece.rotationSpeed;
             
-            if (piece.y > canvas.height) {
-                piece.y = -10;
+            if (piece.y > canvas.height + 20) {
+                piece.y = -20;
                 piece.x = Math.random() * canvas.width;
             }
         });
         
-        requestAnimationFrame(animate);
+        animationId = requestAnimationFrame(animate);
     }
     
     animate();
     
-    // Stop confetti after 10 seconds
+    // Stop confetti after 8 seconds
     setTimeout(() => {
+        cancelAnimationFrame(animationId);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }, 10000);
+    }, 8000);
 }
 
 // Reset App
 function resetApp() {
-    localStorage.clear();
+    // Clear all state
     clearInterval(AppState.dayTimer);
-    DOM.congratsModal.classList.add('hidden');
-    DOM.congratsModal.classList.remove('flex');
-    AppState.currentUser = null;
+    AppState.dayTimer = null;
+    
+    const modal = DOM.congratsModal;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    
     AppState.currentGoal = null;
     AppState.selectedMode = null;
-    showModeSelection();
+    
+    localStorage.removeItem('currentGoal');
+    
+    // Don't remove user, just go to mode selection
+    if (AppState.currentUser) {
+        showModeSelection();
+    } else {
+        hideAllSections();
+        DOM.landingSection.classList.remove('hidden');
+    }
 }
 
 // Hide all sections
