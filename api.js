@@ -1,8 +1,7 @@
 // API Configuration
 const API_CONFIG = {
-    // Change this to your Render backend URL after deployment
-    BASE_URL: 'https://your-app-name.onrender.com/api',
-    // For local development, use: 'http://localhost:3000/api'
+    
+    BASE_URL: 'https://gbackend-3tez.onrender.com/api',
 };
 
 // API Helper Functions
