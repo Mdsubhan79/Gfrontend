@@ -15,7 +15,7 @@ html {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -195,17 +195,1208 @@ html {
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .mode-card {
-        margin-bottom: 20px;
+/* ============================================
+   ULTRA SMALL SCREENS (260px - 320px)
+   ============================================ */
+@media screen and (min-width: 260px) and (max-width: 319px) {
+    /* Container */
+    .container {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+
+    /* Typography */
+    h1 {
+        font-size: 1.5rem !important;
+        line-height: 1.2 !important;
     }
     
+    h2 {
+        font-size: 1.25rem !important;
+        line-height: 1.3 !important;
+    }
+    
+    h3 {
+        font-size: 1rem !important;
+        line-height: 1.4 !important;
+    }
+    
+    p {
+        font-size: 0.75rem !important;
+    }
+
     .text-6xl {
-        font-size: 2.5rem;
+        font-size: 1.5rem !important;
+    }
+    
+    .text-5xl {
+        font-size: 1.25rem !important;
     }
     
     .text-4xl {
-        font-size: 2rem;
+        font-size: 1.125rem !important;
+    }
+    
+    .text-3xl {
+        font-size: 1rem !important;
+    }
+    
+    .text-2xl {
+        font-size: 0.875rem !important;
+    }
+    
+    .text-xl {
+        font-size: 0.75rem !important;
+    }
+    
+    .text-lg {
+        font-size: 0.7rem !important;
+    }
+
+    /* Icons */
+    .fa-8x, .fa-7x, .fa-6x, .fa-5x {
+        font-size: 2rem !important;
+    }
+    
+    .fa-4x {
+        font-size: 1.75rem !important;
+    }
+    
+    .fa-3x {
+        font-size: 1.5rem !important;
+    }
+    
+    .fa-2x {
+        font-size: 1.25rem !important;
+    }
+    
+    .fa-lg {
+        font-size: 1rem !important;
+    }
+
+    /* Cards and Containers */
+    .rounded-2xl, .rounded-3xl {
+        border-radius: 0.75rem !important;
+    }
+
+    .p-8 {
+        padding: 0.75rem !important;
+    }
+    
+    .p-10 {
+        padding: 1rem !important;
+    }
+    
+    .p-6 {
+        padding: 0.5rem !important;
+    }
+    
+    .p-4 {
+        padding: 0.375rem !important;
+    }
+
+    /* Margins */
+    .mb-12, .my-12 {
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .mb-8, .my-8 {
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .mb-6, .my-6 {
+        margin-bottom: 0.375rem !important;
+    }
+    
+    .mb-4, .my-4 {
+        margin-bottom: 0.25rem !important;
+    }
+    
+    .gap-8 {
+        gap: 0.5rem !important;
+    }
+    
+    .gap-6 {
+        gap: 0.375rem !important;
+    }
+    
+    .space-y-5 > * + * {
+        margin-top: 0.5rem !important;
+    }
+    
+    .space-y-3 > * + * {
+        margin-top: 0.375rem !important;
+    }
+
+    /* Form Elements */
+    input, textarea, select {
+        padding: 0.375rem 0.5rem !important;
+        font-size: 0.7rem !important;
+        border-radius: 0.5rem !important;
+    }
+
+    textarea {
+        rows: 2 !important;
+        height: 60px !important;
+    }
+
+    /* Buttons */
+    button {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.75rem !important;
+        border-radius: 0.5rem !important;
+    }
+
+    /* Landing page icon container */
+    .inline-block.p-4 {
+        padding: 0.5rem !important;
+        border-radius: 50% !important;
+        width: 3rem !important;
+        height: 3rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Mode cards */
+    .mode-card {
+        padding: 0.75rem !important;
+    }
+    
+    .mode-card .inline-block.p-6 {
+        padding: 0.5rem !important;
+        border-radius: 50% !important;
+        width: 2.5rem !important;
+        height: 2.5rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .mode-card ul {
+        padding-left: 0.25rem !important;
+    }
+
+    .mode-card li {
+        font-size: 0.65rem !important;
+    }
+
+    .mode-card li i {
+        margin-right: 0.375rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* Team member cards */
+    .team-member-card {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.375rem !important;
+    }
+
+    /* Progress section */
+    .progress-header {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        text-align: left !important;
+    }
+    
+    .progress-header .text-right {
+        text-align: left !important;
+    }
+
+    /* Timer display */
+    #timer-display {
+        font-size: 1.25rem !important;
+    }
+
+    /* Congratulations modal */
+    #congrats-modal .max-w-lg {
+        max-width: 95% !important;
+        margin: 0.5rem !important;
+    }
+
+    /* Toast notifications */
+    #toast-container {
+        top: 0.5rem !important;
+        right: 0.5rem !important;
+        width: calc(100% - 1rem) !important;
+    }
+    
+    .toast-enter {
+        font-size: 0.7rem !important;
+        padding: 0.5rem !important;
+    }
+
+    /* Grid layouts */
+    .grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Flex containers */
+    .flex-wrap {
+        flex-direction: column !important;
+    }
+
+    /* Team link input container */
+    .flex.gap-3 {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+    
+    #copy-link-btn {
+        width: 100% !important;
+        text-align: center !important;
+    }
+
+    /* Loading spinner container */
+    #loading-spinner .bg-white {
+        padding: 0.75rem !important;
+    }
+    
+    #loading-spinner .spinner {
+        width: 30px !important;
+        height: 30px !important;
+        border-width: 3px !important;
+    }
+
+    /* Progress history */
+    #progress-history .goal-card {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.25rem !important;
+    }
+
+    /* Day task section */
+    #day-task-form textarea {
+        height: 50px !important;
+    }
+}
+
+/* ============================================
+   SMALL MOBILE SCREENS (320px - 374px)
+   ============================================ */
+@media screen and (min-width: 320px) and (max-width: 374px) {
+    /* Container */
+    .container {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+
+    /* Typography */
+    h1 {
+        font-size: 1.75rem !important;
+        line-height: 1.2 !important;
+    }
+    
+    h2 {
+        font-size: 1.375rem !important;
+        line-height: 1.3 !important;
+    }
+    
+    h3 {
+        font-size: 1.125rem !important;
+        line-height: 1.4 !important;
+    }
+    
+    p {
+        font-size: 0.8125rem !important;
+    }
+
+    .text-6xl {
+        font-size: 1.75rem !important;
+    }
+    
+    .text-5xl {
+        font-size: 1.5rem !important;
+    }
+    
+    .text-4xl {
+        font-size: 1.375rem !important;
+    }
+    
+    .text-3xl {
+        font-size: 1.125rem !important;
+    }
+    
+    .text-2xl {
+        font-size: 1rem !important;
+    }
+    
+    .text-xl {
+        font-size: 0.875rem !important;
+    }
+    
+    .text-lg {
+        font-size: 0.8125rem !important;
+    }
+
+    /* Icons */
+    .fa-8x, .fa-7x, .fa-6x {
+        font-size: 2.5rem !important;
+    }
+    
+    .fa-5x {
+        font-size: 2.25rem !important;
+    }
+    
+    .fa-4x {
+        font-size: 2rem !important;
+    }
+    
+    .fa-3x {
+        font-size: 1.75rem !important;
+    }
+    
+    .fa-2x {
+        font-size: 1.5rem !important;
+    }
+
+    /* Cards and Containers */
+    .p-8 {
+        padding: 1rem !important;
+    }
+    
+    .p-10 {
+        padding: 1.25rem !important;
+    }
+    
+    .p-6 {
+        padding: 0.75rem !important;
+    }
+    
+    .p-4 {
+        padding: 0.5rem !important;
+    }
+
+    /* Margins */
+    .mb-12, .my-12 {
+        margin-bottom: 1rem !important;
+    }
+    
+    .mb-8, .my-8 {
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .mb-6, .my-6 {
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .mb-4, .my-4 {
+        margin-bottom: 0.375rem !important;
+    }
+    
+    .gap-8 {
+        gap: 0.75rem !important;
+    }
+    
+    .gap-6 {
+        gap: 0.5rem !important;
+    }
+    
+    .space-y-5 > * + * {
+        margin-top: 0.75rem !important;
+    }
+    
+    .space-y-3 > * + * {
+        margin-top: 0.5rem !important;
+    }
+
+    /* Form Elements */
+    input, textarea, select {
+        padding: 0.5rem 0.625rem !important;
+        font-size: 0.8125rem !important;
+    }
+
+    textarea {
+        height: 70px !important;
+    }
+
+    /* Buttons */
+    button {
+        padding: 0.625rem 0.875rem !important;
+        font-size: 0.8125rem !important;
+    }
+
+    /* Landing page icon container */
+    .inline-block.p-4 {
+        padding: 0.625rem !important;
+        width: 3.5rem !important;
+        height: 3.5rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Mode cards */
+    .mode-card {
+        padding: 1rem !important;
+    }
+    
+    .mode-card .inline-block.p-6 {
+        padding: 0.625rem !important;
+        width: 3rem !important;
+        height: 3rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .mode-card li {
+        font-size: 0.75rem !important;
+    }
+
+    .mode-card li i {
+        font-size: 0.875rem !important;
+    }
+
+    /* Grid layouts */
+    .grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Flex containers */
+    .flex-wrap {
+        flex-direction: column !important;
+    }
+
+    /* Team link input container */
+    .flex.gap-3 {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+    
+    #copy-link-btn {
+        width: 100% !important;
+    }
+
+    /* Progress section header */
+    .progress-header {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+    
+    .progress-header .text-right {
+        text-align: left !important;
+    }
+
+    /* Loading spinner */
+    #loading-spinner .bg-white {
+        padding: 1rem !important;
+    }
+    
+    #loading-spinner .spinner {
+        width: 35px !important;
+        height: 35px !important;
+    }
+
+    /* Congratulations modal */
+    #congrats-modal .max-w-lg {
+        max-width: 92% !important;
+    }
+
+    /* Toast notifications */
+    #toast-container {
+        width: calc(100% - 1rem) !important;
+    }
+    
+    .toast-enter {
+        font-size: 0.75rem !important;
+        padding: 0.625rem !important;
+    }
+
+    /* Day task section */
+    #day-task-form textarea {
+        height: 60px !important;
+    }
+}
+
+/* ============================================
+   MOBILE SCREENS (375px - 479px)
+   ============================================ */
+@media screen and (min-width: 375px) and (max-width: 479px) {
+    /* Container */
+    .container {
+        padding-left: 0.625rem !important;
+        padding-right: 0.625rem !important;
+    }
+
+    /* Typography */
+    h1 {
+        font-size: 2rem !important;
+        line-height: 1.2 !important;
+    }
+    
+    h2 {
+        font-size: 1.5rem !important;
+        line-height: 1.3 !important;
+    }
+    
+    h3 {
+        font-size: 1.25rem !important;
+        line-height: 1.4 !important;
+    }
+    
+    p {
+        font-size: 0.875rem !important;
+    }
+
+    .text-6xl {
+        font-size: 2rem !important;
+    }
+    
+    .text-5xl {
+        font-size: 1.75rem !important;
+    }
+    
+    .text-4xl {
+        font-size: 1.5rem !important;
+    }
+    
+    .text-3xl {
+        font-size: 1.25rem !important;
+    }
+    
+    .text-2xl {
+        font-size: 1.125rem !important;
+    }
+    
+    .text-xl {
+        font-size: 1rem !important;
+    }
+    
+    .text-lg {
+        font-size: 0.875rem !important;
+    }
+
+    /* Icons */
+    .fa-8x, .fa-7x, .fa-6x {
+        font-size: 3rem !important;
+    }
+    
+    .fa-5x {
+        font-size: 2.75rem !important;
+    }
+    
+    .fa-4x {
+        font-size: 2.5rem !important;
+    }
+    
+    .fa-3x {
+        font-size: 2rem !important;
+    }
+    
+    .fa-2x {
+        font-size: 1.75rem !important;
+    }
+
+    /* Cards and Containers */
+    .p-8 {
+        padding: 1.25rem !important;
+    }
+    
+    .p-10 {
+        padding: 1.5rem !important;
+    }
+    
+    .p-6 {
+        padding: 1rem !important;
+    }
+    
+    .p-4 {
+        padding: 0.75rem !important;
+    }
+
+    /* Margins */
+    .mb-12, .my-12 {
+        margin-bottom: 1.25rem !important;
+    }
+    
+    .mb-8, .my-8 {
+        margin-bottom: 1rem !important;
+    }
+    
+    .mb-6, .my-6 {
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .mb-4, .my-4 {
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .gap-8 {
+        gap: 1rem !important;
+    }
+    
+    .gap-6 {
+        gap: 0.75rem !important;
+    }
+    
+    .space-y-5 > * + * {
+        margin-top: 0.875rem !important;
+    }
+    
+    .space-y-3 > * + * {
+        margin-top: 0.625rem !important;
+    }
+
+    /* Form Elements */
+    input, textarea, select {
+        padding: 0.625rem 0.75rem !important;
+        font-size: 0.875rem !important;
+    }
+
+    textarea {
+        height: 80px !important;
+    }
+
+    /* Buttons */
+    button {
+        padding: 0.75rem 1rem !important;
+        font-size: 0.875rem !important;
+    }
+
+    /* Grid layouts */
+    .grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Flex containers */
+    .flex-wrap {
+        flex-direction: column !important;
+    }
+
+    /* Team link input container */
+    .flex.gap-3 {
+        flex-direction: column !important;
+        gap: 0.625rem !important;
+    }
+    
+    #copy-link-btn {
+        width: 100% !important;
+    }
+
+    /* Mode cards */
+    .mode-card {
+        padding: 1.25rem !important;
+    }
+
+    .mode-card li {
+        font-size: 0.8125rem !important;
+    }
+
+    .mode-card li i {
+        font-size: 1rem !important;
+    }
+
+    /* Progress section header */
+    .progress-header {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+    }
+    
+    .progress-header .text-right {
+        text-align: left !important;
+    }
+
+    /* Loading spinner */
+    #loading-spinner .bg-white {
+        padding: 1.25rem !important;
+    }
+    
+    #loading-spinner .spinner {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    /* Congratulations modal */
+    #congrats-modal .max-w-lg {
+        max-width: 90% !important;
+    }
+
+    /* Toast notifications */
+    #toast-container {
+        width: calc(100% - 1.25rem) !important;
+    }
+    
+    .toast-enter {
+        font-size: 0.8125rem !important;
+        padding: 0.75rem !important;
+    }
+
+    /* Day task section */
+    #day-task-form textarea {
+        height: 70px !important;
+        rows: 3 !important;
+    }
+}
+
+/* ============================================
+   LARGE MOBILE SCREENS (480px - 639px)
+   ============================================ */
+@media screen and (min-width: 480px) and (max-width: 639px) {
+    /* Typography */
+    h1 {
+        font-size: 2.25rem !important;
+    }
+    
+    h2 {
+        font-size: 1.75rem !important;
+    }
+    
+    h3 {
+        font-size: 1.375rem !important;
+    }
+    
+    p {
+        font-size: 0.9375rem !important;
+    }
+
+    .text-6xl {
+        font-size: 2.25rem !important;
+    }
+    
+    .text-5xl {
+        font-size: 2rem !important;
+    }
+    
+    .text-4xl {
+        font-size: 1.75rem !important;
+    }
+    
+    .text-3xl {
+        font-size: 1.375rem !important;
+    }
+    
+    .text-2xl {
+        font-size: 1.25rem !important;
+    }
+    
+    .text-xl {
+        font-size: 1.125rem !important;
+    }
+    
+    .text-lg {
+        font-size: 1rem !important;
+    }
+
+    /* Icons */
+    .fa-8x, .fa-7x, .fa-6x {
+        font-size: 4rem !important;
+    }
+    
+    .fa-5x {
+        font-size: 3.5rem !important;
+    }
+    
+    .fa-4x {
+        font-size: 3rem !important;
+    }
+    
+    .fa-3x {
+        font-size: 2.5rem !important;
+    }
+    
+    .fa-2x {
+        font-size: 2rem !important;
+    }
+
+    /* Grid layouts */
+    .grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Team link input container */
+    .flex.gap-3 {
+        flex-wrap: wrap !important;
+    }
+    
+    #copy-link-btn {
+        width: auto !important;
+    }
+
+    /* Progress section header */
+    .progress-header {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 1rem !important;
+    }
+
+    /* Day task section */
+    #day-task-form textarea {
+        height: 80px !important;
+        rows: 3 !important;
+    }
+
+    /* Mode cards */
+    .mode-card {
+        padding: 1.5rem !important;
+    }
+
+    .mode-card li {
+        font-size: 0.875rem !important;
+    }
+
+    .mode-card li i {
+        font-size: 1.125rem !important;
+    }
+
+    /* Congratulations modal */
+    #congrats-modal .max-w-lg {
+        max-width: 85% !important;
+    }
+}
+
+/* ============================================
+   TABLET SCREENS (640px - 767px)
+   ============================================ */
+@media screen and (min-width: 640px) and (max-width: 767px) {
+    /* Typography */
+    h1 {
+        font-size: 2.5rem !important;
+    }
+    
+    h2 {
+        font-size: 2rem !important;
+    }
+
+    .text-6xl {
+        font-size: 2.5rem !important;
+    }
+    
+    .text-5xl {
+        font-size: 2.25rem !important;
+    }
+    
+    .text-4xl {
+        font-size: 2rem !important;
+    }
+
+    /* Grid layouts */
+    .grid {
+        grid-template-columns: 1fr !important;
+        max-width: 500px !important;
+        margin: 0 auto !important;
+    }
+
+    /* Mode cards */
+    .mode-card {
+        padding: 2rem !important;
+    }
+
+    /* Progress section */
+    .progress-header {
+        flex-direction: row !important;
+    }
+
+    /* Day task section */
+    #day-task-form textarea {
+        height: 90px !important;
+        rows: 3 !important;
+    }
+}
+
+/* ============================================
+   SMALL TABLET SCREENS (768px - 899px)
+   ============================================ */
+@media screen and (min-width: 768px) and (max-width: 899px) {
+    /* Typography */
+    h1 {
+        font-size: 2.75rem !important;
+    }
+    
+    h2 {
+        font-size: 2.25rem !important;
+    }
+
+    .text-6xl {
+        font-size: 2.75rem !important;
+    }
+    
+    .text-5xl {
+        font-size: 2.5rem !important;
+    }
+    
+    .text-4xl {
+        font-size: 2.25rem !important;
+    }
+
+    /* Grid layouts */
+    .grid {
+        gap: 1.25rem !important;
+    }
+
+    /* Mode cards */
+    .mode-card {
+        padding: 1.75rem !important;
+    }
+
+    /* Day task section */
+    #day-task-form textarea {
+        height: 100px !important;
+        rows: 3 !important;
+    }
+}
+
+/* ============================================
+   LARGE TABLET SCREENS (900px - 1023px)
+   ============================================ */
+@media screen and (min-width: 900px) and (max-width: 1023px) {
+    /* Typography */
+    h1 {
+        font-size: 3.25rem !important;
+    }
+
+    .text-6xl {
+        font-size: 3.25rem !important;
+    }
+
+    /* Grid layouts */
+    .grid {
+        gap: 1.5rem !important;
+    }
+
+    /* Mode cards */
+    .mode-card {
+        padding: 2rem !important;
+    }
+}
+
+/* ============================================
+   SMALL DESKTOP SCREENS (1024px - 1279px)
+   ============================================ */
+@media screen and (min-width: 1024px) and (max-width: 1279px) {
+    /* Typography */
+    h1 {
+        font-size: 3.75rem !important;
+    }
+
+    .text-6xl {
+        font-size: 3.75rem !important;
+    }
+
+    /* Container */
+    .container {
+        max-width: 960px !important;
+    }
+
+    /* Grid layouts */
+    .grid {
+        gap: 2rem !important;
+    }
+}
+
+/* ============================================
+   MEDIUM DESKTOP SCREENS (1280px - 1439px)
+   ============================================ */
+@media screen and (min-width: 1280px) and (max-width: 1439px) {
+    /* Typography */
+    h1 {
+        font-size: 4rem !important;
+    }
+
+    .text-6xl {
+        font-size: 4rem !important;
+    }
+
+    /* Container */
+    .container {
+        max-width: 1100px !important;
+    }
+}
+
+/* ============================================
+   LARGE DESKTOP SCREENS (1440px - 1919px)
+   ============================================ */
+@media screen and (min-width: 1440px) and (max-width: 1919px) {
+    /* Typography */
+    h1 {
+        font-size: 4.5rem !important;
+    }
+
+    .text-6xl {
+        font-size: 4.5rem !important;
+    }
+
+    /* Container */
+    .container {
+        max-width: 1200px !important;
+    }
+
+    /* Grid layouts */
+    .grid {
+        gap: 2.5rem !important;
+    }
+}
+
+/* ============================================
+   EXTRA LARGE SCREENS (1920px and above)
+   ============================================ */
+@media screen and (min-width: 1920px) {
+    /* Typography */
+    h1 {
+        font-size: 5rem !important;
+    }
+
+    .text-6xl {
+        font-size: 5rem !important;
+    }
+    
+    .text-5xl {
+        font-size: 3.5rem !important;
+    }
+
+    /* Container */
+    .container {
+        max-width: 1400px !important;
+    }
+
+    /* Cards */
+    .p-8 {
+        padding: 2.5rem !important;
+    }
+    
+    .p-10 {
+        padding: 3rem !important;
+    }
+
+    /* Grid layouts */
+    .grid {
+        gap: 3rem !important;
+    }
+
+    /* Mode cards */
+    .mode-card {
+        padding: 2.5rem !important;
+    }
+
+    /* Form elements */
+    input, textarea, select {
+        padding: 1rem 1.25rem !important;
+        font-size: 1.125rem !important;
+    }
+
+    /* Buttons */
+    button {
+        padding: 1.125rem 1.5rem !important;
+        font-size: 1.125rem !important;
+    }
+
+    /* Day task section */
+    #day-task-form textarea {
+        height: 150px !important;
+        rows: 5 !important;
+    }
+}
+
+/* ============================================
+   HIGH DPI SCREENS (Retina displays)
+   ============================================ */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* Improve text rendering */
+    * {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* ============================================
+   DARK MODE SUPPORT (Optional)
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+    /* Uncomment if you want to add dark mode */
+    /* 
+    body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+    }
+    
+    .bg-white {
+        background-color: #2a2a3e !important;
+        color: #f0f0f0 !important;
+    }
+    
+    .text-gray-800 {
+        color: #f0f0f0 !important;
+    }
+    
+    .text-gray-700 {
+        color: #e0e0e0 !important;
+    }
+    
+    .text-gray-600 {
+        color: #d0d0d0 !important;
+    }
+    
+    .text-gray-500 {
+        color: #c0c0c0 !important;
+    }
+    
+    input, textarea, select {
+        background-color: #3a3a4e !important;
+        color: #f0f0f0 !important;
+        border-color: #4a4a5e !important;
+    }
+    
+    .bg-gray-50 {
+        background-color: #2a2a3e !important;
+    }
+    
+    .bg-yellow-50 {
+        background-color: #3a3a2e !important;
+    }
+    
+    .bg-blue-50 {
+        background-color: #2a2a4e !important;
+    }
+    */
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .bg-gradient-to-br,
+    .bg-gradient-to-r {
+        background: none !important;
+    }
+    
+    button,
+    .no-print {
+        display: none !important;
+    }
+    
+    .shadow-xl,
+    .shadow-2xl,
+    .shadow-lg {
+        box-shadow: none !important;
+    }
+    
+    .rounded-2xl,
+    .rounded-3xl,
+    .rounded-xl {
+        border-radius: 0 !important;
+    }
+}
+
+/* ============================================
+   REDUCED MOTION PREFERENCES
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .animate-bounce {
+        animation: none !important;
     }
 }
