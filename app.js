@@ -23,10 +23,38 @@ const DOM = {
 };
 
 // Initialize App
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+
     AppState.socketManager = new SocketManager();
+
     setupEventListeners();
+
     checkTeamInvite();
+
+    // LOAD SAVED USER
+    const savedUser = localStorage.getItem('goalTrackerUser');
+
+    // LOAD SAVED GOAL
+    const savedGoal = localStorage.getItem('currentGoal');
+
+    if (savedUser) {
+
+        AppState.currentUser = JSON.parse(savedUser);
+
+        AppState.socketManager.connect(
+            AppState.currentUser._id
+        );
+
+    }
+
+    if (savedGoal) {
+
+        AppState.currentGoal = JSON.parse(savedGoal);
+
+        await loadProgressSection();
+
+    }
+
 });
 
 // Setup Event Listeners
@@ -48,7 +76,7 @@ function setupEventListeners() {
     document.getElementById('start-team-btn')?.addEventListener('click', startTeamGoal);
 
     // Day Task Form
-    document.getElementById('day-task-form')?.addEventListener('click', handleDayComplete);
+    document.getElementById('day-task-form')?.addEventListener('submit', handleDayComplete);
 
     // New Goal Button
     document.getElementById('new-goal-btn')?.addEventListener('click', resetApp);
@@ -111,6 +139,10 @@ async function handleRegistration(e) {
         
         if (response.success) {
             AppState.currentUser = response.user;
+            localStorage.setItem(
+    'goalTrackerUser',
+    JSON.stringify(response.user)
+);
             
             // Initialize socket connection
             AppState.socketManager.connect(response.user._id);
@@ -141,6 +173,11 @@ async function handleJoinTeam(teamLink, userId) {
 
         if (response.success) {
             AppState.currentGoal = response.goal;
+            localStorage.setItem(
+    'currentGoal',
+    JSON.stringify(response.goal)
+);
+            
             showToast('Successfully joined the team!', 'success');
             showTeamLinkSection();
         } else {
@@ -200,7 +237,10 @@ async function handleGoalSetup(e) {
         
         if (response.success) {
             AppState.currentGoal = response.goal;
-            
+            localStorage.setItem(
+    'currentGoal',
+    JSON.stringify(response.goal)
+);
             if (AppState.selectedMode === 'solo') {
                 loadProgressSection();
             } else {
@@ -287,6 +327,10 @@ async function updateTeamMembersList() {
         }
         
         AppState.currentGoal = goal;
+        localStorage.setItem(
+    'currentGoal',
+    JSON.stringify(goal)
+);
     } catch (error) {
         showToast('Failed to update team list', 'error');
     }
@@ -304,6 +348,10 @@ async function startTeamGoal() {
         
         if (response.success) {
             AppState.currentGoal = response.goal;
+            localStorage.setItem(
+    'currentGoal',
+    JSON.stringify(response.goal)
+);
             loadProgressSection();
         } else {
             showToast(response.message || 'Failed to start goal', 'error');
@@ -399,7 +447,14 @@ function getCompletedDaysCount() {
         );
         return userProgress ? userProgress.userProgress.length : 0;
     } else {
-        return AppState.currentGoal.currentDay - 1;
+        function getCompletedDaysCount() {
+
+    if (!AppState.currentGoal) return 0;
+
+    const userProgress = getCurrentUserProgress();
+
+    return userProgress.length;
+}
     }
 }
 
@@ -465,17 +520,18 @@ function updateDayTimer() {
 
 // Get current user's progress
 function getCurrentUserProgress() {
+
     if (!AppState.currentGoal) return [];
-    
-    if (AppState.currentGoal.mode === 'team') {
-        const userProgress = AppState.currentGoal.teamProgress.find(
-            tp => tp.userId === AppState.currentUser._id || 
-                  tp.userId._id === AppState.currentUser._id
-        );
-        return userProgress ? userProgress.userProgress : [];
-    } else {
-        return [];
-    }
+
+    const userProgress = AppState.currentGoal.teamProgress.find(
+        tp =>
+            tp.userId === AppState.currentUser._id ||
+            tp.userId._id === AppState.currentUser._id
+    );
+
+    return userProgress
+        ? userProgress.userProgress
+        : [];
 }
 
 // Handle Day Complete
@@ -500,6 +556,10 @@ async function handleDayComplete(e) {
             } else {
                 showToast('🎉 Day completed! Great job!', 'success');
                 AppState.currentGoal = response.goal;
+                localStorage.setItem(
+    'currentGoal',
+    JSON.stringify(response.goal)
+);
                 loadProgressSection();
             }
         } else {
@@ -576,7 +636,7 @@ function loadProgressHistory() {
         return;
     }
     
-    userProgress.reverse().forEach(day => {
+    [...userProgress].reverse().forEach(day => {
         const dayCard = document.createElement('div');
         dayCard.className = 'goal-card bg-white border-2 border-gray-100 rounded-xl p-4 flex items-center';
         dayCard.innerHTML = `
@@ -667,9 +727,11 @@ function createConfetti() {
 
 // Reset App
 function resetApp() {
+    localStorage.clear();
     clearInterval(AppState.dayTimer);
     DOM.congratsModal.classList.add('hidden');
     DOM.congratsModal.classList.remove('flex');
+    AppState.currentUser = null;
     AppState.currentGoal = null;
     AppState.selectedMode = null;
     showModeSelection();
