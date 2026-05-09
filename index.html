@@ -18,6 +18,11 @@
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    <!-- Back Button -->
+<button onclick="goback()" id="back-btn"
+class="fixed top-4 left-4 z-50 bg-red-600 text-white px-4 py-2 rounded-xl shadow-lg hover:bg-red-700 transition-all">
+    <i class="fas fa-arrow-left"></i>
+</button>
 
     <!-- Loading Spinner -->
     <div id="loading-spinner" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
@@ -360,7 +365,12 @@ class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z
     </div>
 
     <!-- Scripts -->
-
+<script>
+    
+ function goback() {
+            window.history.back();
+        }
+</script>
     <script type="module" src="app.js"></script>
 </body>
 </html>
