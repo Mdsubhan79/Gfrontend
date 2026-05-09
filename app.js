@@ -1011,16 +1011,21 @@ onclick="openOldGoal('${goal._id}')">
 // OPEN OLD GOAL
 // ======================================================
 
-window.openOldGoal = async function(goalId) {
+window.openOldGoal = function(goalId) {
 
     try {
 
-        showLoading(true);
+        const goals =
+            JSON.parse(
+                localStorage.getItem('allGoals')
+            ) || [];
 
-        const response =
-            await API.getGoal(goalId);
+        const selectedGoal =
+            goals.find(
+                goal => goal._id === goalId
+            );
 
-        if (!response.success) {
+        if (!selectedGoal) {
 
             showToast(
                 'Goal not found',
@@ -1032,22 +1037,20 @@ window.openOldGoal = async function(goalId) {
 
         // set active goal
         AppState.currentGoal =
-            response.goal;
+            selectedGoal;
 
         // save current goal
         localStorage.setItem(
             'currentGoal',
-            JSON.stringify(response.goal)
+            JSON.stringify(selectedGoal)
         );
 
         // close modal
         document
-            .getElementById(
-                'old-goals-modal'
-            )
+            .getElementById('old-goals-modal')
             .classList.add('hidden');
 
-        // load goal screen
+        // load goal section
         loadProgressSection();
 
         showToast(
@@ -1063,10 +1066,6 @@ window.openOldGoal = async function(goalId) {
             'Failed to open goal',
             'error'
         );
-
-    } finally {
-
-        showLoading(false);
     }
 };
 
