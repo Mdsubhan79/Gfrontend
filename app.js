@@ -977,7 +977,9 @@ function showOldGoals() {
         goals.forEach(goal => {
 
             list.innerHTML += `
-                <div class="border rounded-xl p-4">
+                <div 
+class="border rounded-xl p-4 cursor-pointer hover:bg-gray-100 transition-all"
+onclick="openOldGoal('${goal._id}')">
 
                     <h3 class="font-bold text-xl">
                         ${goal.goalName}
@@ -1004,3 +1006,66 @@ function showOldGoals() {
 
     modal.classList.add('flex');
 }
+
+// ======================================================
+// OPEN OLD GOAL
+// ======================================================
+
+window.openOldGoal = async function(goalId) {
+
+    try {
+
+        showLoading(true);
+
+        const response =
+            await API.getGoal(goalId);
+
+        if (!response.success) {
+
+            showToast(
+                'Goal not found',
+                'error'
+            );
+
+            return;
+        }
+
+        // set active goal
+        AppState.currentGoal =
+            response.goal;
+
+        // save current goal
+        localStorage.setItem(
+            'currentGoal',
+            JSON.stringify(response.goal)
+        );
+
+        // close modal
+        document
+            .getElementById(
+                'old-goals-modal'
+            )
+            .classList.add('hidden');
+
+        // load goal screen
+        loadProgressSection();
+
+        showToast(
+            'Goal loaded',
+            'success'
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            'Failed to open goal',
+            'error'
+        );
+
+    } finally {
+
+        showLoading(false);
+    }
+};
