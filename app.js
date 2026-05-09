@@ -895,3 +895,23 @@ function showToast(message, type = 'info') {
 
     }, 3000);
 }
+
+// ======================================================
+// BACK BUTTON
+// ======================================================
+
+document
+    .getElementById('back-btn')
+    ?.addEventListener('click', () => {
+
+        // mobile browsers
+        if (window.history.length > 1) {
+
+            window.history.back();
+
+        } else {
+
+            // desktop / fallback
+            window.close();
+        }
+    });
