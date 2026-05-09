@@ -817,49 +817,42 @@ function resetApp() {
 
     showToast('Create your new goal 🚀', 'success');
 }
-async function deleteGoal() {
+function deleteGoal() {
 
-    const confirmDelete =
-        confirm('Delete this goal permanently?');
+    if (!AppState.currentGoal) return;
 
-    if (!confirmDelete) return;
+    // remove from all goals
+    const allGoals =
+    JSON.parse(
+        localStorage.getItem('allGoals')
+    ) || [];
 
-    try {
+    const updatedGoals =
+    allGoals.filter(
+        goal =>
+        goal._id !== AppState.currentGoal._id
+    );
 
-        showLoading(true);
+    localStorage.setItem(
+        'allGoals',
+        JSON.stringify(updatedGoals)
+    );
 
-        const response =
-            await API.deleteGoal(
-                AppState.currentGoal._id,
-                AppState.currentUser._id
-            );
+    // remove current goal
+    localStorage.removeItem(
+        'currentGoal'
+    );
 
-        if (response.success) {
+    AppState.currentGoal = null;
 
-            localStorage.removeItem('currentGoal');
+    showToast(
+        'Goal deleted successfully',
+        'success'
+    );
 
-            AppState.currentGoal = null;
-
-            showToast('Goal deleted', 'success');
-
-            resetApp();
-
-        } else {
-
-            showToast(response.message, 'error');
-        }
-
-    } catch (error) {
-
-        console.error(error);
-
-        showToast('Delete failed', 'error');
-
-    } finally {
-
-        showLoading(false);
-    }
+    resetApp();
 }
+
 // HIDE ALL
 function hideAllSections() {
 
@@ -1089,5 +1082,46 @@ document
     } else {
 
         DOM.modeSection.classList.remove('hidden');
+    }
+});
+
+document
+.getElementById('back-btn')
+?.addEventListener('click', () => {
+
+    // progress -> mode
+    if (
+        !DOM.progressSection.classList.contains('hidden')
+    ) {
+
+        DOM.progressSection.classList.add('hidden');
+
+        DOM.modeSection.classList.remove('hidden');
+
+        return;
+    }
+
+    // setup -> mode
+    if (
+        !DOM.goalSetupSection.classList.contains('hidden')
+    ) {
+
+        DOM.goalSetupSection.classList.add('hidden');
+
+        DOM.modeSection.classList.remove('hidden');
+
+        return;
+    }
+
+    // mode -> landing
+    if (
+        !DOM.modeSection.classList.contains('hidden')
+    ) {
+
+        DOM.modeSection.classList.add('hidden');
+
+        DOM.landingSection.classList.remove('hidden');
+
+        return;
     }
 });
