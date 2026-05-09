@@ -135,6 +135,10 @@ function setupEventListeners() {
        .getElementById('create-new-goal-btn')
        ?.addEventListener('click', resetApp);
 
+    document
+    .getElementById('delete-goal-btn')
+    ?.addEventListener('click', deleteGoal);
+
     setupSocketListeners();
 }
 
@@ -490,6 +494,31 @@ async function loadProgressSection() {
         .textContent =
         `Day ${completedDays + 1}`;
 
+
+    const deleteBtn =
+    document.getElementById('delete-goal-btn');
+
+// SOLO = always show
+if (goal.mode === 'solo') {
+
+    deleteBtn.classList.remove('hidden');
+
+} else {
+
+    // TEAM = only creator
+    if (
+        goal.creator._id.toString() ===
+        AppState.currentUser._id.toString()
+    ) {
+
+        deleteBtn.classList.remove('hidden');
+
+    } else {
+
+        deleteBtn.classList.add('hidden');
+    }
+}
+
     loadProgressHistory();
 
     if (!checkDayUnlocked()) {
@@ -778,7 +807,49 @@ function resetApp() {
 
     showToast('Create your new goal 🚀', 'success');
 }
+async function deleteGoal() {
 
+    const confirmDelete =
+        confirm('Delete this goal permanently?');
+
+    if (!confirmDelete) return;
+
+    try {
+
+        showLoading(true);
+
+        const response =
+            await API.deleteGoal(
+                AppState.currentGoal._id,
+                AppState.currentUser._id
+            );
+
+        if (response.success) {
+
+            localStorage.removeItem('currentGoal');
+
+            AppState.currentGoal = null;
+
+            showToast('Goal deleted', 'success');
+
+            resetApp();
+
+        } else {
+
+            showToast(response.message, 'error');
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast('Delete failed', 'error');
+
+    } finally {
+
+        showLoading(false);
+    }
+}
 // HIDE ALL
 function hideAllSections() {
 

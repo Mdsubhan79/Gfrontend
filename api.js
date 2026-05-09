@@ -114,4 +114,75 @@ const API = {
     }
 };
 
+// ======================================================
+// DELETE GOAL
+// ======================================================
+
+router.delete('/delete/:goalId/:userId', async (req, res) => {
+
+    try {
+
+        const { goalId, userId } = req.params;
+
+        const goal = await Goal.findById(goalId);
+
+        if (!goal) {
+
+            return res.status(404).json({
+                success: false,
+                message: 'Goal not found'
+            });
+        }
+
+        // SOLO MODE
+        if (goal.mode === 'solo') {
+
+            if (goal.creator.toString() !== userId.toString()) {
+
+                return res.status(403).json({
+                    success: false,
+                    message: 'Unauthorized'
+                });
+            }
+
+            await Goal.findByIdAndDelete(goalId);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Solo goal deleted'
+            });
+        }
+
+        // TEAM MODE
+        if (goal.mode === 'team') {
+
+            // only creator can delete
+            if (goal.creator.toString() !== userId.toString()) {
+
+                return res.status(403).json({
+                    success: false,
+                    message: 'Only creator can delete team goal'
+                });
+            }
+
+            await Goal.findByIdAndDelete(goalId);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Team goal deleted'
+            });
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: 'Delete failed'
+        });
+    }
+});
+
+
 export default API;
