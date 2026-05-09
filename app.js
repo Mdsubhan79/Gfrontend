@@ -1069,3 +1069,26 @@ window.openOldGoal = async function(goalId) {
         showLoading(false);
     }
 };
+
+
+document
+.getElementById('back-btn')
+?.addEventListener('click', () => {
+
+    // hide all sections
+    hideAllSections();
+
+    // show previous screen
+    if (AppState.currentGoal) {
+
+        DOM.progressSection.classList.remove('hidden');
+
+    } else if (AppState.selectedMode) {
+
+        DOM.goalSetupSection.classList.remove('hidden');
+
+    } else {
+
+        DOM.modeSection.classList.remove('hidden');
+    }
+});

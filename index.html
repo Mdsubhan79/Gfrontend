@@ -19,9 +19,9 @@
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
     <!-- Back Button -->
-<button onclick="history.back()"
+<button id="back-btn"
 class="fixed top-4 left-4 bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-indigo-700 z-50">
-← Back
+←
 </button>
 
     <!-- Loading Spinner -->
@@ -99,6 +99,17 @@ class="fixed top-4 left-4 bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-l
             <div class="text-center mb-12">
                 <h2 class="text-4xl font-bold text-gray-800 mb-4">Choose Your Path</h2>
                 <p class="text-xl text-gray-600">Select how you want to achieve your goals</p>
+                <div class="mt-6">
+    
+    <button id="view-old-goals-btn"
+    class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-all shadow-lg">
+        
+        <i class="fas fa-folder-open mr-2"></i>
+        Show Old Goals
+
+    </button>
+
+</div>
             </div>
 
             <div class="grid md:grid-cols-2 gap-8">
