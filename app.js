@@ -817,40 +817,63 @@ function resetApp() {
 
     showToast('Create your new goal 🚀', 'success');
 }
-function deleteGoal() {
 
-    if (!AppState.currentGoal) return;
+async function deleteGoal() {
 
-    // remove from all goals
+    const confirmDelete =
+        confirm('Delete this goal permanently?');
+
+    if (!confirmDelete) return;
+
+    try {
+
+        showLoading(true);
+
+        const response =
+            await API.deleteGoal(
+                AppState.currentGoal._id,
+                AppState.currentUser._id
+            );
+
+        if (response.success) {
+
+            localStorage.removeItem('currentGoal');
+
+            AppState.currentGoal = null;
+
+            showToast('Goal deleted', 'success');
+
+            resetApp();
+
+        } else {
+
+            showToast(response.message, 'error');
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast('Delete failed', 'error');
+
+    } finally {
+
+        showLoading(false);
+    }
     const allGoals =
-    JSON.parse(
-        localStorage.getItem('allGoals')
-    ) || [];
+JSON.parse(
+localStorage.getItem('allGoals')
+) || [];
 
-    const updatedGoals =
-    allGoals.filter(
-        goal =>
-        goal._id !== AppState.currentGoal._id
-    );
+const updatedGoals =
+allGoals.filter(
+goal => goal._id !== AppState.currentGoal._id
+);
 
-    localStorage.setItem(
-        'allGoals',
-        JSON.stringify(updatedGoals)
-    );
-
-    // remove current goal
-    localStorage.removeItem(
-        'currentGoal'
-    );
-
-    AppState.currentGoal = null;
-
-    showToast(
-        'Goal deleted successfully',
-        'success'
-    );
-
-    resetApp();
+localStorage.setItem(
+'allGoals',
+JSON.stringify(updatedGoals)
+);
 }
 
 // HIDE ALL
