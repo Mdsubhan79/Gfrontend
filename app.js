@@ -131,6 +131,10 @@ function setupEventListeners() {
         .getElementById('new-goal-btn')
         ?.addEventListener('click', resetApp);
 
+    document
+       .getElementById('create-new-goal-btn')
+       ?.addEventListener('click', resetApp);
+
     setupSocketListeners();
 }
 
@@ -742,13 +746,37 @@ function resetApp() {
 
     clearInterval(AppState.dayTimer);
 
+    // reset state
     AppState.currentGoal = null;
 
+    AppState.selectedMode = null;
+
+    // remove old goal
     localStorage.removeItem('currentGoal');
 
+    // hide modal
     DOM.congratsModal.classList.add('hidden');
 
-    showModeSelection();
+    DOM.congratsModal.classList.remove('flex');
+
+    // clear forms
+    document.getElementById('goal-setup-form').reset();
+
+    document.getElementById('day-task-form').reset();
+
+    // reset sections
+    hideAllSections();
+
+    // show mode selection
+    DOM.modeSection.classList.remove('hidden');
+
+    // scroll top
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+    showToast('Create your new goal 🚀', 'success');
 }
 
 // HIDE ALL
