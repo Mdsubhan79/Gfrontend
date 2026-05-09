@@ -139,6 +139,19 @@ function setupEventListeners() {
     .getElementById('delete-goal-btn')
     ?.addEventListener('click', deleteGoal);
 
+    document
+.getElementById('view-old-goals-btn')
+?.addEventListener('click', showOldGoals);
+
+document
+.getElementById('close-old-goals')
+?.addEventListener('click', () => {
+
+    document
+    .getElementById('old-goals-modal')
+    .classList.add('hidden');
+});
+
     setupSocketListeners();
 }
 
@@ -273,10 +286,7 @@ function saveCurrentGoal(goal) {
 
     AppState.currentGoal = goal;
 
-    localStorage.setItem(
-        'currentGoal',
-        JSON.stringify(goal)
-    );
+    saveGoal(goal);
 }
 
 // MODE SELECTION
@@ -915,3 +925,100 @@ document
             window.close();
         }
     });
+
+    // ======================================================
+// SAVE GOALS
+// ======================================================
+
+function saveGoal(goal) {
+
+    let goals =
+        JSON.parse(
+            localStorage.getItem('allGoals')
+        ) || [];
+
+    // avoid duplicate
+    const exists = goals.find(
+        g => g._id === goal._id
+    );
+
+    if (!exists) {
+
+        goals.push(goal);
+    }
+
+    localStorage.setItem(
+        'allGoals',
+        JSON.stringify(goals)
+    );
+
+    localStorage.setItem(
+        'currentGoal',
+        JSON.stringify(goal)
+    );
+}
+
+
+// ======================================================
+// SHOW OLD GOALS
+// ======================================================
+
+function showOldGoals() {
+
+    const modal =
+        document.getElementById(
+            'old-goals-modal'
+        );
+
+    const list =
+        document.getElementById(
+            'old-goals-list'
+        );
+
+    const goals =
+        JSON.parse(
+            localStorage.getItem('allGoals')
+        ) || [];
+
+    list.innerHTML = '';
+
+    if (goals.length === 0) {
+
+        list.innerHTML = `
+            <p class="text-gray-500">
+                No goals found
+            </p>
+        `;
+
+    } else {
+
+        goals.forEach(goal => {
+
+            list.innerHTML += `
+                <div class="border rounded-xl p-4">
+
+                    <h3 class="font-bold text-xl">
+                        ${goal.goalName}
+                    </h3>
+
+                    <p>
+                        Days: ${goal.totalDays}
+                    </p>
+
+                    <p>
+                        Mode: ${goal.mode}
+                    </p>
+
+                    <p>
+                        Status: ${goal.status}
+                    </p>
+
+                </div>
+            `;
+        });
+    }
+
+    modal.classList.remove('hidden');
+
+    modal.classList.add('flex');
+}
