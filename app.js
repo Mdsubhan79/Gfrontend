@@ -232,30 +232,42 @@ function setupSocketListeners() {
 // LIVE TEAM REFRESH
 // ======================================
 
+// ======================================
+// LIVE TEAM UPDATE
+// ======================================
+
 AppState.socketManager.on(
     'teamProgressUpdated',
     async (data) => {
 
         try {
 
-            // IMPORTANT
-            // USE SOCKET GOAL DIRECTLY
-
+            // FULLY REPLACE STATE
             AppState.currentGoal =
-                data.goal;
+                structuredClone(data.goal);
 
-            // save latest state
-            saveGoal(data.goal);
+            // SAVE NEWEST GOAL
+            saveGoal(AppState.currentGoal);
 
-            // FULL LIVE REFRESH
+            // WAIT FOR DOM UPDATE
+            await new Promise(resolve =>
+                setTimeout(resolve, 100)
+            );
+
+            // FORCE FULL REFRESH
             await loadProgressSection();
 
-            loadProgressHistory();
+            // FORCE HISTORY REBUILD
+            setTimeout(() => {
+
+                loadProgressHistory();
+
+            }, 50);
 
         } catch (error) {
 
             console.error(
-                'Live refresh failed',
+                'Realtime update failed',
                 error
             );
         }
@@ -747,7 +759,7 @@ if (goal.mode === 'solo') {
     }
 }
 
-    loadProgressHistory();
+    
 
     if (!checkDayUnlocked()) {
 
@@ -954,8 +966,7 @@ function loadProgressHistory() {
     container.innerHTML = '';
 
     const goal =
-        AppState.currentGoal;
-
+    structuredClone(AppState.currentGoal);
     if (!goal) return;
 
     // ==========================================
