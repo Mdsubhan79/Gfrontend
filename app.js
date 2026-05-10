@@ -155,41 +155,135 @@ document
     setupSocketListeners();
 }
 
-// SOCKETS
+// ===
+// SOCKET LISTENERS
+// ===
+
 function setupSocketListeners() {
 
-    AppState.socketManager.on('teamMemberJoined', () => {
+    AppState.socketManager.on(
+        'teamMemberJoined',
+        async () => {
 
-        showToast('Team member joined!', 'success');
+            showToast(
+                'New member joined!',
+                'success'
+            );
 
-        updateTeamMembersList();
-    });
+            await updateTeamMembersList();
+        }
+    );
 
-    AppState.socketManager.on('teamGoalStarted', async () => {
+    AppState.socketManager.on(
+        'teamGoalStarted',
+        async () => {
 
-        showToast('Goal started!', 'success');
+            showToast(
+                'Goal started!',
+                'success'
+            );
 
-        await loadProgressSection();
-    });
+            await loadProgressSection();
+        }
+    );
 
-    AppState.socketManager.on('goalCompleted', () => {
+    AppState.socketManager.on(
+        'goalCompleted',
+        () => {
 
-        showCongratulations();
-    });
+            showCongratulations();
+        }
+    );
+
+    AppState.socketManager.on(
+        'teamProgressUpdated',
+        async () => {
+
+            await loadProgressSection();
+        }
+    );
 }
+// ===
+// CHECK TEAM INVITE
+// ===
 
-// TEAM INVITE
-function checkTeamInvite() {
+async function checkTeamInvite() {
 
-    const params = new URLSearchParams(window.location.search);
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
 
-    const teamLink = params.get('teamLink');
+    const teamLink =
+        params.get('teamLink');
 
-    if (teamLink) {
+    if (!teamLink) return;
 
-        AppState.teamInviteLink = teamLink;
+    AppState.teamInviteLink = teamLink;
 
-        showToast('Complete registration to join team', 'info');
+    // already logged in
+    const savedUser =
+        localStorage.getItem(
+            'goalTrackerUser'
+        );
+
+    if (savedUser) {
+
+        AppState.currentUser =
+            JSON.parse(savedUser);
+
+        try {
+
+            showLoading(true);
+
+            // auto join
+            const response =
+                await API.joinTeam({
+                    teamLink,
+                    userId:
+                    AppState.currentUser._id
+                });
+
+            if (response.success) {
+
+                AppState.currentGoal =
+                    response.goal;
+
+                saveCurrentGoal(
+                    response.goal
+                );
+
+                showTeamLinkSection();
+
+                showToast(
+                    'Joined team successfully',
+                    'success'
+                );
+
+            } else {
+
+                showToast(
+                    response.message,
+                    'error'
+                );
+            }
+
+        } catch (error) {
+
+            console.error(error);
+
+        } finally {
+
+            showLoading(false);
+        }
+
+    } else {
+
+        // user not logged in
+        showToast(
+            'Register to join team',
+            'info'
+        );
     }
 }
 
@@ -375,19 +469,26 @@ async function handleGoalSetup(e) {
     }
 }
 
-// TEAM LINK
-function showTeamLinkSection() {
+// ===
+// SHOW TEAM SCREEN
+// ===
+
+async function showTeamLinkSection() {
 
     hideAllSections();
 
-    DOM.teamLinkSection.classList.remove('hidden');
+    DOM.teamLinkSection
+    .classList.remove('hidden');
 
     const link =
-        `${window.location.origin}?teamLink=${AppState.currentGoal.teamLink}`;
+`${window.location.origin}?teamLink=${AppState.currentGoal.teamLink}`;
 
-    document.getElementById('team-link-input').value = link;
+    document
+    .getElementById(
+        'team-link-input'
+    ).value = link;
 
-    updateTeamMembersList();
+    await updateTeamMembersList();
 }
 
 // COPY LINK
@@ -400,44 +501,102 @@ async function copyTeamLink() {
 
     showToast('Link copied!', 'success');
 }
+// ===
+// UPDATE TEAM MEMBERS
+// ===
 
-// TEAM LIST
 async function updateTeamMembersList() {
 
-    const response = await API.getGoal(
-        AppState.currentGoal._id
-    );
+    const response =
+        await API.getGoal(
+            AppState.currentGoal._id
+        );
+
+    if (!response.success) return;
 
     const goal = response.goal;
 
+    AppState.currentGoal = goal;
+
+    saveCurrentGoal(goal);
+
     const list =
-        document.getElementById('team-members-list');
+        document.getElementById(
+            'team-members-list'
+        );
 
     list.innerHTML = '';
 
     goal.teamMembers.forEach(member => {
 
-        const div = document.createElement('div');
+        const div =
+            document.createElement('div');
 
         div.className =
             'bg-gray-100 p-4 rounded-xl mb-3';
 
         div.innerHTML = `
-            <p class="font-bold">${member.name}</p>
-            <p>${member.email}</p>
+            <div class="flex items-center justify-between">
+
+                <div>
+                    <p class="font-bold">
+                        ${member.name}
+                    </p>
+
+                    <p class="text-sm text-gray-600">
+                        ${member.email}
+                    </p>
+                </div>
+
+                <div class="text-green-600">
+                    <i class="fas fa-circle"></i>
+                </div>
+
+            </div>
         `;
 
         list.appendChild(div);
     });
 
+    // START BUTTON LOGIC
+
+    const startBtn =
+        document.getElementById(
+            'start-team-btn'
+        );
+
+    const creatorId =
+        typeof goal.creator === 'object'
+        ? goal.creator._id
+        : goal.creator;
+
+    // only creator sees button
     if (
-        goal.teamMembers.length >=
-        goal.maxTeamMembers
+        creatorId.toString() ===
+        AppState.currentUser._id.toString()
     ) {
 
-        document
-            .getElementById('start-team-btn')
-            .classList.remove('hidden');
+        if (
+            goal.teamMembers.length >=
+            goal.maxTeamMembers
+        ) {
+
+            startBtn.classList.remove(
+                'hidden'
+            );
+
+        } else {
+
+            startBtn.classList.add(
+                'hidden'
+            );
+        }
+
+    } else {
+
+        startBtn.classList.add(
+            'hidden'
+        );
     }
 }
 
