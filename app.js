@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (response.success) {
 
                     AppState.currentGoal = response.goal;
+                    saveGoal(response.goal);
 
                     saveCurrentGoal(response.goal);
 
@@ -231,6 +232,9 @@ function setupSocketListeners() {
 // ======================================
 // LIVE TEAM UPDATE
 // ======================================
+// ======================================
+// LIVE TEAM UPDATE
+// ======================================
 
 AppState.socketManager.on(
     'teamProgressUpdated',
@@ -238,7 +242,7 @@ AppState.socketManager.on(
 
         try {
 
-            // ALWAYS FETCH LATEST GOAL
+            // ALWAYS FETCH FRESH GOAL
             const response =
                 await API.getGoal(
                     data.goal._id
@@ -251,19 +255,19 @@ AppState.socketManager.on(
             AppState.currentGoal =
                 response.goal;
 
-            // SAVE
+            // UPDATE STORAGE
             saveGoal(response.goal);
 
             // FULL UI REFRESH
             await loadProgressSection();
 
-            // FORCE HISTORY REFRESH
+            // FORCE HISTORY UPDATE
             loadProgressHistory();
 
         } catch (error) {
 
             console.error(
-                'Realtime sync failed',
+                'Live sync failed',
                 error
             );
         }
@@ -1392,6 +1396,9 @@ function showOldGoals() {
 
     modal.classList.add('flex');
 }
+// ======================================
+// OPEN OLD GOAL
+// ======================================
 
 window.openOldGoal = async function(goalId) {
 
@@ -1413,43 +1420,36 @@ window.openOldGoal = async function(goalId) {
             return;
         }
 
-        // update app state
+        // UPDATE STATE
         AppState.currentGoal =
             response.goal;
 
-        // IMPORTANT
+        // SAVE LATEST GOAL
         saveGoal(response.goal);
 
-        // save current goal
-        localStorage.setItem(
-            'currentGoal',
-            JSON.stringify(response.goal)
-        );
-
-        // close old goal modal
+        // CLOSE MODAL
         document
-            .getElementById('old-goals-modal')
+            .getElementById(
+                'old-goals-modal'
+            )
             .classList.add('hidden');
 
-        // ===================================
-        // TEAM WAITING ROOM
-        // ===================================
-
+        // TEAM PENDING
         if (
             response.goal.mode === 'team' &&
             response.goal.status === 'pending'
         ) {
 
             await showTeamLinkSection();
+
         }
 
-        // ===================================
-        // ACTIVE TEAM / SOLO
-        // ===================================
-
+        // ACTIVE/COMPLETED
         else {
 
             await loadProgressSection();
+
+            loadProgressHistory();
         }
 
         showToast(
