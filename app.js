@@ -230,12 +230,44 @@ function setupSocketListeners() {
     );
 
     AppState.socketManager.on(
-        'teamProgressUpdated',
-        async () => {
+    'teamProgressUpdated',
+    async (data) => {
 
+        try {
+
+            // get latest goal
+            const response =
+                await API.getGoal(
+                    data.goalId
+                );
+
+            if (!response.success)
+                return;
+
+            // update app state
+            AppState.currentGoal =
+                response.goal;
+
+            // save latest goal
+            saveGoal(response.goal);
+
+            // reload progress
             await loadProgressSection();
+
+            // live history update
+            loadProgressHistory();
+
+            showToast(
+                'Team progress updated 🚀',
+                'success'
+            );
+
+        } catch (error) {
+
+            console.error(error);
         }
-    );
+    }
+);
 }
 // ===
 // CHECK TEAM INVITE
