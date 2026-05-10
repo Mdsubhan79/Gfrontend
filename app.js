@@ -58,14 +58,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     saveCurrentGoal(response.goal);
 
-                    if (response.goal.status === 'completed') {
+                    // TEAM WAITING ROOM
+if (
+    response.goal.mode === 'team' &&
+    response.goal.status === 'pending'
+) {
 
-                        showCongratulations();
+    await showTeamLinkSection();
+}
 
-                    } else {
+// COMPLETED
+else if (
+    response.goal.status === 'completed'
+) {
 
-                        await loadProgressSection();
-                    }
+    showCongratulations();
+}
+
+// ACTIVE GOAL
+else {
+
+    await loadProgressSection();
+}
 
                 } else {
 
@@ -162,17 +176,27 @@ document
 function setupSocketListeners() {
 
     AppState.socketManager.on(
-        'teamMemberJoined',
-        async () => {
+    'teamMemberJoined',
+    async () => {
 
-            showToast(
-                'New member joined!',
-                'success'
+        const response =
+            await API.getGoal(
+                AppState.currentGoal._id
             );
 
-            await updateTeamMembersList();
+        if (response.success) {
+
+            AppState.currentGoal =
+                response.goal;
+
+            saveCurrentGoal(
+                response.goal
+            );
+
+            await showTeamLinkSection();
         }
-    );
+    }
+);
 
     AppState.socketManager.on(
         'teamGoalStarted',
@@ -1198,25 +1222,19 @@ function showOldGoals() {
 
     modal.classList.add('flex');
 }
+
 // ======================================================
 // OPEN OLD GOAL
 // ======================================================
 
-window.openOldGoal = function(goalId) {
+window.openOldGoal = async function(goalId) {
 
     try {
 
-        const goals =
-            JSON.parse(
-                localStorage.getItem('allGoals')
-            ) || [];
+        const response =
+            await API.getGoal(goalId);
 
-        const selectedGoal =
-            goals.find(
-                goal => goal._id === goalId
-            );
-
-        if (!selectedGoal) {
+        if (!response.success) {
 
             showToast(
                 'Goal not found',
@@ -1226,14 +1244,11 @@ window.openOldGoal = function(goalId) {
             return;
         }
 
-        // set active goal
         AppState.currentGoal =
-            selectedGoal;
+            response.goal;
 
-        // save current goal
-        localStorage.setItem(
-            'currentGoal',
-            JSON.stringify(selectedGoal)
+        saveCurrentGoal(
+            response.goal
         );
 
         // close modal
@@ -1241,8 +1256,21 @@ window.openOldGoal = function(goalId) {
             .getElementById('old-goals-modal')
             .classList.add('hidden');
 
-        // load goal section
-        loadProgressSection();
+        // TEAM WAITING ROOM
+        if (
+            response.goal.mode === 'team' &&
+            response.goal.status === 'pending'
+        ) {
+
+            await showTeamLinkSection();
+
+        }
+
+        // ACTIVE / COMPLETED GOAL
+        else {
+
+            await loadProgressSection();
+        }
 
         showToast(
             'Goal loaded',
@@ -1259,7 +1287,6 @@ window.openOldGoal = function(goalId) {
         );
     }
 };
-
 
 document
 .getElementById('back-btn')
