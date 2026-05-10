@@ -817,65 +817,57 @@ function resetApp() {
 
     showToast('Create your new goal 🚀', 'success');
 }
+// ======================================================
+// DELETE OLD GOAL
+// ======================================================
 
-async function deleteGoal() {
+window.deleteOldGoal = function(goalId) {
 
     const confirmDelete =
-        confirm('Delete this goal permanently?');
+        confirm(
+            'Are you sure you want to delete this goal permanently?'
+        );
 
     if (!confirmDelete) return;
 
-    try {
+    let goals =
+        JSON.parse(
+            localStorage.getItem('allGoals')
+        ) || [];
 
-        showLoading(true);
+    // remove goal
+    goals =
+        goals.filter(
+            goal => goal._id !== goalId
+        );
 
-        const response =
-            await API.deleteGoal(
-                AppState.currentGoal._id,
-                AppState.currentUser._id
-            );
+    // save updated list
+    localStorage.setItem(
+        'allGoals',
+        JSON.stringify(goals)
+    );
 
-        if (response.success) {
+    // remove current goal if same
+    if (
+        AppState.currentGoal &&
+        AppState.currentGoal._id === goalId
+    ) {
 
-            localStorage.removeItem('currentGoal');
+        AppState.currentGoal = null;
 
-            AppState.currentGoal = null;
-
-            showToast('Goal deleted', 'success');
-
-            resetApp();
-
-        } else {
-
-            showToast(response.message, 'error');
-        }
-
-    } catch (error) {
-
-        console.error(error);
-
-        showToast('Delete failed', 'error');
-
-    } finally {
-
-        showLoading(false);
+        localStorage.removeItem(
+            'currentGoal'
+        );
     }
-    const allGoals =
-JSON.parse(
-localStorage.getItem('allGoals')
-) || [];
 
-const updatedGoals =
-allGoals.filter(
-goal => goal._id !== AppState.currentGoal._id
-);
+    showToast(
+        'Goal deleted permanently',
+        'success'
+    );
 
-localStorage.setItem(
-'allGoals',
-JSON.stringify(updatedGoals)
-);
-}
-
+    // refresh modal
+    showOldGoals();
+};
 // HIDE ALL
 function hideAllSections() {
 
@@ -956,7 +948,6 @@ function saveGoal(goal) {
     );
 }
 
-
 // ======================================================
 // SHOW OLD GOALS
 // ======================================================
@@ -983,7 +974,7 @@ function showOldGoals() {
     if (goals.length === 0) {
 
         list.innerHTML = `
-            <p class="text-gray-500">
+            <p class="text-gray-500 text-center">
                 No goals found
             </p>
         `;
@@ -993,25 +984,42 @@ function showOldGoals() {
         goals.forEach(goal => {
 
             list.innerHTML += `
-                <div 
-class="border rounded-xl p-4 cursor-pointer hover:bg-gray-100 transition-all"
-onclick="openOldGoal('${goal._id}')">
 
-                    <h3 class="font-bold text-xl">
-                        ${goal.goalName}
-                    </h3>
+                <div class="border rounded-2xl p-4 shadow-md hover:shadow-lg transition-all bg-white">
 
-                    <p>
-                        Days: ${goal.totalDays}
-                    </p>
+                    <div class="flex justify-between items-start gap-3">
 
-                    <p>
-                        Mode: ${goal.mode}
-                    </p>
+                        <div 
+                        class="flex-1 cursor-pointer"
+                        onclick="openOldGoal('${goal._id}')">
 
-                    <p>
-                        Status: ${goal.status}
-                    </p>
+                            <h3 class="font-bold text-xl text-indigo-700">
+                                ${goal.goalName}
+                            </h3>
+
+                            <p class="text-gray-600 mt-1">
+                                Days: ${goal.totalDays}
+                            </p>
+
+                            <p class="text-gray-600">
+                                Mode: ${goal.mode}
+                            </p>
+
+                            <p class="text-gray-600">
+                                Status: ${goal.status}
+                            </p>
+
+                        </div>
+
+                        <button
+                        onclick="deleteOldGoal('${goal._id}')"
+                        class="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition-all">
+
+                            <i class="fas fa-trash"></i>
+
+                        </button>
+
+                    </div>
 
                 </div>
             `;
@@ -1022,7 +1030,6 @@ onclick="openOldGoal('${goal._id}')">
 
     modal.classList.add('flex');
 }
-
 // ======================================================
 // OPEN OLD GOAL
 // ======================================================
