@@ -229,10 +229,6 @@ function setupSocketListeners() {
         }
     );
 // ======================================
-// LIVE TEAM REFRESH
-// ======================================
-
-// ======================================
 // LIVE TEAM UPDATE
 // ======================================
 
@@ -242,32 +238,32 @@ AppState.socketManager.on(
 
         try {
 
-            // FULLY REPLACE STATE
+            // ALWAYS FETCH LATEST GOAL
+            const response =
+                await API.getGoal(
+                    data.goal._id
+                );
+
+            if (!response.success)
+                return;
+
+            // UPDATE STATE
             AppState.currentGoal =
-                structuredClone(data.goal);
+                response.goal;
 
-            // SAVE NEWEST GOAL
-            saveGoal(AppState.currentGoal);
+            // SAVE
+            saveGoal(response.goal);
 
-            // WAIT FOR DOM UPDATE
-            await new Promise(resolve =>
-                setTimeout(resolve, 100)
-            );
-
-            // FORCE FULL REFRESH
+            // FULL UI REFRESH
             await loadProgressSection();
 
-            // FORCE HISTORY REBUILD
-            setTimeout(() => {
-
-                loadProgressHistory();
-
-            }, 50);
+            // FORCE HISTORY REFRESH
+            loadProgressHistory();
 
         } catch (error) {
 
             console.error(
-                'Realtime update failed',
+                'Realtime sync failed',
                 error
             );
         }
