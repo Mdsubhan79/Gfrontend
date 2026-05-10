@@ -905,49 +905,187 @@ async function handleDayComplete(e) {
     }
 }
 
-// HISTORY
+// ======================================================
+// LOAD HISTORY
+// ======================================================
+
 function loadProgressHistory() {
 
     const container =
-        document.getElementById('progress-history');
+        document.getElementById(
+            'progress-history'
+        );
 
     container.innerHTML = '';
 
-    const progress =
-        getCurrentUserProgress();
+    const goal =
+        AppState.currentGoal;
 
-    if (progress.length === 0) {
+    if (!goal) return;
 
-        container.innerHTML = `
-            <div class="text-center py-8">
-                No progress yet
-            </div>
-        `;
+    // ==========================================
+    // SOLO MODE
+    // ==========================================
+
+    if (goal.mode === 'solo') {
+
+        const progress =
+            getCurrentUserProgress();
+
+        if (progress.length === 0) {
+
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    No progress yet
+                </div>
+            `;
+
+            return;
+        }
+
+        [...progress]
+        .reverse()
+        .forEach(day => {
+
+            const div =
+                document.createElement('div');
+
+            div.className =
+                'bg-white border rounded-xl p-4 mb-3 shadow';
+
+            div.innerHTML = `
+
+                <div class="flex justify-between items-center mb-2">
+
+                    <h3 class="font-bold text-indigo-700">
+                        Day ${day.dayNumber}
+                    </h3>
+
+                    <span class="text-green-600 text-sm">
+                        Completed
+                    </span>
+
+                </div>
+
+                <p class="text-gray-700 mb-2">
+                    ${day.task}
+                </p>
+
+                <small class="text-gray-500">
+                    ${new Date(day.completedAt)
+                        .toLocaleString()}
+                </small>
+            `;
+
+            container.appendChild(div);
+        });
 
         return;
     }
 
-    [...progress].reverse().forEach(day => {
+    // ==========================================
+    // TEAM MODE
+    // ==========================================
 
-        const div = document.createElement('div');
+    const totalDays =
+        goal.totalDays;
 
-        div.className =
-            'bg-white border rounded-xl p-4 mb-3';
+    for (let day = 1; day <= totalDays; day++) {
 
-        div.innerHTML = `
-            <h3 class="font-bold">
-                Day ${day.dayNumber}
-            </h3>
+        const dayBox =
+            document.createElement('div');
 
-            <p>${day.task}</p>
+        dayBox.className =
+            'bg-gray-50 border rounded-2xl p-4 mb-5';
 
-            <small>
-                ${new Date(day.completedAt).toLocaleString()}
-            </small>
+        dayBox.innerHTML = `
+            <h2 class="text-xl font-bold text-indigo-700 mb-4">
+                Day ${day}
+            </h2>
         `;
 
-        container.appendChild(div);
-    });
+        goal.teamMembers.forEach(member => {
+
+            // find member progress
+            const memberProgress =
+                goal.teamProgress.find(tp => {
+
+                    const id =
+                        tp.userId._id
+                            ? tp.userId._id.toString()
+                            : tp.userId.toString();
+
+                    return (
+                        id === member._id.toString()
+                    );
+                });
+
+            // find current day task
+            const dayTask =
+                memberProgress?.userProgress
+                    ?.find(
+                        p => p.dayNumber === day
+                    );
+
+            const taskDiv =
+                document.createElement('div');
+
+            taskDiv.className =
+                'bg-white rounded-xl p-4 mb-3 shadow-sm';
+
+            // completed
+            if (dayTask) {
+
+                taskDiv.innerHTML = `
+
+                    <div class="flex justify-between items-center mb-2">
+
+                        <h3 class="font-bold text-purple-700">
+                            ${member.name}
+                        </h3>
+
+                        <span class="text-green-600 text-sm font-semibold">
+                            Completed
+                        </span>
+
+                    </div>
+
+                    <p class="text-gray-700 mb-2">
+                        ${dayTask.task}
+                    </p>
+
+                    <small class="text-gray-500">
+                        ${new Date(dayTask.completedAt)
+                            .toLocaleString()}
+                    </small>
+                `;
+
+            }
+
+            // not completed
+            else {
+
+                taskDiv.innerHTML = `
+
+                    <div class="flex justify-between items-center">
+
+                        <h3 class="font-bold text-purple-700">
+                            ${member.name}
+                        </h3>
+
+                        <span class="text-red-500 text-sm font-semibold">
+                            Not completed yet
+                        </span>
+
+                    </div>
+                `;
+            }
+
+            dayBox.appendChild(taskDiv);
+        });
+
+        container.appendChild(dayBox);
+    }
 }
 
 // CONGRATS
