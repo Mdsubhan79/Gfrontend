@@ -690,6 +690,8 @@ async function handleDayComplete(e) {
 
             saveCurrentGoal(response.goal);
 
+            loadProgressHistory();
+
             document.getElementById('day-task-input').value = '';
 
             if (response.goal.status === 'completed') {
@@ -915,8 +917,7 @@ function showToast(message, type = 'info') {
 }
 
 
-
-    // ======================================================
+// ======================================================
 // SAVE GOALS
 // ======================================================
 
@@ -927,27 +928,35 @@ function saveGoal(goal) {
             localStorage.getItem('allGoals')
         ) || [];
 
-    // avoid duplicate
-    const exists = goals.find(
-        g => g._id === goal._id
-    );
+    // find existing goal index
+    const existingIndex =
+        goals.findIndex(
+            g => g._id === goal._id
+        );
 
-    if (!exists) {
+    // update existing goal
+    if (existingIndex !== -1) {
 
+        goals[existingIndex] = goal;
+
+    } else {
+
+        // add new goal
         goals.push(goal);
     }
 
+    // save updated goals
     localStorage.setItem(
         'allGoals',
         JSON.stringify(goals)
     );
 
+    // save current goal
     localStorage.setItem(
         'currentGoal',
         JSON.stringify(goal)
     );
 }
-
 // ======================================================
 // SHOW OLD GOALS
 // ======================================================
