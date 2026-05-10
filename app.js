@@ -99,8 +99,18 @@ else {
 
         } else {
 
-            showModeSelection();
-        }
+    // check old goals
+    const allGoals =
+        JSON.parse(
+            localStorage.getItem('allGoals')
+        ) || [];
+
+    // show mode screen
+    showModeSelection();
+
+    // optional auto-open latest goal
+    // if you want later
+}
 
     } else {
 
@@ -1241,7 +1251,6 @@ function showToast(message, type = 'info') {
 // ======================================================
 // SAVE GOALS
 // ======================================================
-
 function saveGoal(goal) {
 
     let goals =
@@ -1249,35 +1258,26 @@ function saveGoal(goal) {
             localStorage.getItem('allGoals')
         ) || [];
 
-    // find existing goal index
-    const existingIndex =
-        goals.findIndex(
-            g => g._id === goal._id
+    // remove duplicate
+    goals =
+        goals.filter(
+            g => g._id !== goal._id
         );
 
-    // update existing goal
-    if (existingIndex !== -1) {
+    // add updated goal
+    goals.unshift(goal);
 
-        goals[existingIndex] = goal;
-
-    } else {
-
-        // add new goal
-        goals.push(goal);
-    }
-
-    // save updated goals
     localStorage.setItem(
         'allGoals',
         JSON.stringify(goals)
     );
 
-    // save current goal
     localStorage.setItem(
         'currentGoal',
         JSON.stringify(goal)
     );
 }
+
 // ======================================================
 // SHOW OLD GOALS
 // ======================================================
@@ -1361,14 +1361,13 @@ function showOldGoals() {
     modal.classList.add('flex');
 }
 
-// ======================================================
-// OPEN OLD GOAL
-// ======================================================
-
 window.openOldGoal = async function(goalId) {
 
     try {
 
+        showLoading(true);
+
+        // ALWAYS FETCH LATEST GOAL
         const response =
             await API.getGoal(goalId);
 
@@ -1382,29 +1381,40 @@ window.openOldGoal = async function(goalId) {
             return;
         }
 
+        // update app state
         AppState.currentGoal =
             response.goal;
 
-        saveCurrentGoal(
-            response.goal
+        // IMPORTANT
+        saveGoal(response.goal);
+
+        // save current goal
+        localStorage.setItem(
+            'currentGoal',
+            JSON.stringify(response.goal)
         );
 
-        // close modal
+        // close old goal modal
         document
             .getElementById('old-goals-modal')
             .classList.add('hidden');
 
+        // ===================================
         // TEAM WAITING ROOM
+        // ===================================
+
         if (
             response.goal.mode === 'team' &&
             response.goal.status === 'pending'
         ) {
 
             await showTeamLinkSection();
-
         }
 
-        // ACTIVE / COMPLETED GOAL
+        // ===================================
+        // ACTIVE TEAM / SOLO
+        // ===================================
+
         else {
 
             await loadProgressSection();
@@ -1423,6 +1433,10 @@ window.openOldGoal = async function(goalId) {
             'Failed to open goal',
             'error'
         );
+
+    } finally {
+
+        showLoading(false);
     }
 };
 
