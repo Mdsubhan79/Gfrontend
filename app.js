@@ -228,43 +228,36 @@ function setupSocketListeners() {
             showCongratulations();
         }
     );
+// ======================================
+// LIVE TEAM REFRESH
+// ======================================
 
-    AppState.socketManager.on(
+AppState.socketManager.on(
     'teamProgressUpdated',
     async (data) => {
 
         try {
 
-            // get latest goal
-            const response =
-                await API.getGoal(
-                    data.goalId
-                );
+            // IMPORTANT
+            // USE SOCKET GOAL DIRECTLY
 
-            if (!response.success)
-                return;
-
-            // update app state
             AppState.currentGoal =
-                response.goal;
+                data.goal;
 
-            // save latest goal
-            saveGoal(response.goal);
+            // save latest state
+            saveGoal(data.goal);
 
-            // reload progress
+            // FULL LIVE REFRESH
             await loadProgressSection();
 
-            // live history update
             loadProgressHistory();
-
-            showToast(
-                'Team progress updated 🚀',
-                'success'
-            );
 
         } catch (error) {
 
-            console.error(error);
+            console.error(
+                'Live refresh failed',
+                error
+            );
         }
     }
 );
