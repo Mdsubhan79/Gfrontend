@@ -711,7 +711,8 @@ async function loadProgressSection() {
 
     saveCurrentGoal(response.goal);
 
-    const goal = response.goal;
+    
+    loadProgressHistory();
 
     document.getElementById('current-goal-name')
         .textContent = goal.goalName;
