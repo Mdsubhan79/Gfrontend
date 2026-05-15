@@ -7,7 +7,24 @@
     padding: 0;
     box-sizing: border-box;
 }
+/* Fix Footer at Bottom */
+html, body {
+    height: 100%;
+}
 
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#app {
+    flex: 1;
+}
+
+footer {
+    margin-top: auto;
+}
 /* Smooth scrolling */
 html {
     scroll-behavior: smooth;
