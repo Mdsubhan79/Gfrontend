@@ -513,8 +513,11 @@ function checkDayUnlocked() {
 
     const completed = new Date(last.completedAt).getTime();
     const now = Date.now();
+
+    // 12 hour difference
     const diff = (now - completed) / (1000 * 60 * 60);
-    return diff >= 24;
+
+    return diff >= 12;
 }
 
 // TIMER
@@ -526,13 +529,17 @@ function startDayTimer() {
 
 function updateDayTimer() {
     const progress = getCurrentUserProgress();
+
     if (progress.length === 0) {
         clearInterval(AppState.dayTimer);
         return;
     }
 
     const last = progress[progress.length - 1];
-    const unlock = new Date(last.completedAt).getTime() + (24 * 60 * 60 * 1000);
+
+    // 12 hour unlock timer
+    const unlock = new Date(last.completedAt).getTime() + (12 * 60 * 60 * 1000);
+
     const diff = unlock - Date.now();
 
     if (diff <= 0) {
@@ -546,11 +553,14 @@ function updateDayTimer() {
     const s = Math.floor((diff % (1000 * 60)) / 1000);
 
     const timerDisplay = document.getElementById('timer-display');
+
     if (timerDisplay) {
-        timerDisplay.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        timerDisplay.textContent =
+            `${String(h).padStart(2, '0')}:` +
+            `${String(m).padStart(2, '0')}:` +
+            `${String(s).padStart(2, '0')}`;
     }
 }
-
 // COMPLETE DAY
 async function handleDayComplete(e) {
     e.preventDefault();
